@@ -1,5 +1,5 @@
 import {
-  calcEchoPerSec,
+  calcEchoPerSecWithEvents,
   calcUpgradePrice,
   getVisibleUpgrades,
 } from '../../config/gameConfig.js'
@@ -11,7 +11,7 @@ const LEVEL_LABEL = 'ур.'
 const BADGE_CLASSES = ['badge--alert', 'badge--accent', 'badge--bg']
 
 export default function UpgradePanel({ save, onBuy }) {
-  const echoPerSec = calcEchoPerSec(save)
+  const echoPerSec = calcEchoPerSecWithEvents(save)
   const upgrades = getVisibleUpgrades(save.stage || 1)
 
   return (

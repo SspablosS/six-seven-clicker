@@ -3,19 +3,25 @@ import {
   TICK_MS,
   addEcho,
   applyStageProgress,
-  calcClickValue,
-  calcEchoPerSec,
+  calcClickValueWithEvents,
+  calcEchoPerSecWithEvents,
+  getResourceLabel,
   getStageDef,
   getStageName,
   getStageTheme,
   isAttentionUnlocked,
   isRebirthUnlocked,
   performRebirth,
+  pruneActiveEvents,
   purchaseUpgrade,
+  randomEventDelayMs,
+  triggerRandomEvent,
 } from '../../config/gameConfig.js'
 import { loadSave, persistSave } from './api/saveApi'
+import ActiveEffects from './ActiveEffects'
 import ClickButton from './ClickButton'
 import { BRAND_NAME, ECHO_LABEL } from './constants'
+import EventToast from './EventToast'
 import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
 import StageCutscene from './StageCutscene'
@@ -25,7 +31,6 @@ import './App.css'
 
 const ATTENTION_LABEL = 'Внимание'
 const REBIRTH_LABEL = 'Переродиться'
-/** Не чаще раза в N мс — иначе каждый тик пассива долбит диск */
 const PERSIST_INTERVAL_MS = 15000
 
 function themeStyle(stage) {
@@ -45,6 +50,8 @@ function App() {
   const [offlineEarned, setOfflineEarned] = useState(0)
   const [showOfflineModal, setShowOfflineModal] = useState(false)
   const [cutscene, setCutscene] = useState(null)
+  const [eventToast, setEventToast] = useState(null)
+  const [now, setNow] = useState(() => Date.now())
   const [error, setError] = useState(null)
   const [floaters, setFloaters] = useState([])
   const [hydrated, setHydrated] = useState(false)
@@ -82,6 +89,7 @@ function App() {
             nextSave.lifetimeEcho || nextSave.echo || 0,
           ),
         }
+        cleaned = pruneActiveEvents(cleaned)
         cleaned = applyStageProgress(cleaned).save
         prevStageRef.current = cleaned.stage || 1
         skipNextPersistRef.current = true
@@ -117,7 +125,6 @@ function App() {
     markDirty()
   }, [save, hydrated])
 
-  // Редкое автосохранение + flush при уходе со вкладки
   useEffect(() => {
     if (!hydrated) return undefined
 
@@ -137,25 +144,63 @@ function App() {
     }
   }, [hydrated])
 
+  // Пассивный тик + обновление таймеров эффектов
   useEffect(() => {
     if (!hydrated) return undefined
 
     const timer = window.setInterval(() => {
+      const tickNow = Date.now()
+      setNow(tickNow)
       setSave((prev) => {
         if (!prev) return prev
-        const gain = calcEchoPerSec(prev)
-        if (gain <= 0) return prev
-        return applyStageProgress(addEcho(prev, gain)).save
+        let next = pruneActiveEvents(prev, tickNow)
+        const gain = calcEchoPerSecWithEvents(next, tickNow)
+        if (gain > 0) {
+          next = applyStageProgress(addEcho(next, gain)).save
+        }
+        return next
       })
     }, TICK_MS)
 
     return () => window.clearInterval(timer)
   }, [hydrated])
 
+  // Случайные события раз в 20–60 сек
+  useEffect(() => {
+    if (!hydrated) return undefined
+
+    let cancelled = false
+    let timeoutId
+
+    function scheduleNext() {
+      const delay = randomEventDelayMs()
+      timeoutId = window.setTimeout(() => {
+        if (cancelled) return
+        const current = saveRef.current
+        if (current) {
+          const { save: next, toast } = triggerRandomEvent(current)
+          setSave(next)
+          if (toast) {
+            setEventToast(toast)
+            setNow(Date.now())
+          }
+        }
+        scheduleNext()
+      }, delay)
+    }
+
+    scheduleNext()
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+    }
+  }, [hydrated])
+
   function handleShout() {
     if (!save) return
 
-    const gain = calcClickValue(save)
+    const gain = calcClickValueWithEvents(save, now)
     setSave((prev) =>
       applyStageProgress({
         ...addEcho(prev, gain),
@@ -211,7 +256,10 @@ function App() {
 
   const stage = save?.stage || 1
   const stageName = save ? getStageName(save.stage) : null
-  const clickValue = save ? calcClickValue(save) : 0
+  const clickValue = save ? calcClickValueWithEvents(save, now) : 0
+  const resourceLabel = save
+    ? getResourceLabel(save, ECHO_LABEL, now)
+    : ECHO_LABEL
   const themeVars = useMemo(() => themeStyle(stage), [stage])
 
   return (
@@ -221,9 +269,11 @@ function App() {
       {error && <p className="status">Ошибка: {error}</p>}
       {save && (
         <>
+          <ActiveEffects activeEvents={save.activeEvents} now={now} />
+
           <div className="resource-row">
             <p className="echo-counter" aria-live="polite">
-              <span className="echo-counter__label">{ECHO_LABEL}</span>
+              <span className="echo-counter__label">{resourceLabel}</span>
               <span className="echo-counter__value">{formatNumber(save.echo)}</span>
             </p>
             {isAttentionUnlocked(save) && (
@@ -272,6 +322,9 @@ function App() {
           text={cutscene.text}
           onClose={() => setCutscene(null)}
         />
+      )}
+      {eventToast && (
+        <EventToast toast={eventToast} onClose={() => setEventToast(null)} />
       )}
     </main>
   )

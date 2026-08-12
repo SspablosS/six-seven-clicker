@@ -22,6 +22,50 @@ export const BOTFARM_CRISIS_CHANCE_PER_LEVEL = 0.02;
 /** Локальные новости: +Внимание за уровень при покупке */
 export const NEWS_ATTENTION_PER_LEVEL = 1;
 
+/** Интервал случайных событий */
+export const EVENT_INTERVAL_MIN_MS = 20_000;
+export const EVENT_INTERVAL_MAX_MS = 60_000;
+
+export const EVENTS = {
+  muskTweet: {
+    id: 'muskTweet',
+    type: 'bonus',
+    icon: 'X',
+    title: 'Илон Маск затвитил про мем',
+    description: 'Доход ×5 на 60 сек',
+    durationMs: 60_000,
+    incomeMult: 5,
+  },
+  parentsBan: {
+    id: 'parentsBan',
+    type: 'crisis',
+    icon: '!',
+    title: 'Родители запретили мем',
+    description: 'Доход ×0.5 на 30 сек',
+    durationMs: 30_000,
+    incomeMult: 0.5,
+  },
+  copyright: {
+    id: 'copyright',
+    type: 'penalty',
+    icon: '©',
+    title: 'Заявка на авторские права на 6-7',
+    description: 'Списывает 10% текущего Эха',
+    durationMs: 0,
+    echoLossPercent: 0.1,
+  },
+  memeTwist: {
+    id: 'memeTwist',
+    type: 'twist',
+    icon: '78',
+    title: 'Мем эволюционировал в 7-8',
+    description: 'Ресурс временно «7-8», доход ×2 на 2 мин',
+    durationMs: 120_000,
+    incomeMult: 2,
+    resourceLabel: '7-8',
+  },
+};
+
 /**
  * Этапы культа.
  * theme — плоские цвета (без градиентов), пишутся в CSS-переменные.
@@ -255,8 +299,114 @@ export function calcClickValue(save) {
   return BASE_CLICK_VALUE + megaphone * MEGAPHONE_PER_LEVEL;
 }
 
+export function pruneActiveEvents(save, now = Date.now()) {
+  const activeEvents = (save.activeEvents || []).filter((e) => e.endsAt > now);
+  if (activeEvents.length === (save.activeEvents || []).length) return save;
+  return { ...save, activeEvents };
+}
+
+export function getIncomeMultiplier(save, now = Date.now()) {
+  const active = pruneActiveEvents(save, now).activeEvents || [];
+  return active.reduce((mult, entry) => {
+    const def = EVENTS[entry.id];
+    return mult * (def?.incomeMult ?? 1);
+  }, 1);
+}
+
+export function getResourceLabel(save, fallback = 'Эхо', now = Date.now()) {
+  const active = pruneActiveEvents(save, now).activeEvents || [];
+  for (let i = active.length - 1; i >= 0; i -= 1) {
+    const label = EVENTS[active[i].id]?.resourceLabel;
+    if (label) return label;
+  }
+  return fallback;
+}
+
+export function scaleIncome(amount, mult) {
+  if (amount <= 0 || mult <= 0) return 0;
+  return Math.max(0, Math.floor(amount * mult));
+}
+
+export function randomEventDelayMs() {
+  const span = EVENT_INTERVAL_MAX_MS - EVENT_INTERVAL_MIN_MS;
+  return EVENT_INTERVAL_MIN_MS + Math.floor(Math.random() * (span + 1));
+}
+
+export function hasActiveTimedEvent(save, now = Date.now()) {
+  const active = pruneActiveEvents(save, now).activeEvents || [];
+  return active.some((e) => (EVENTS[e.id]?.durationMs ?? 0) > 0);
+}
+
+/** Вес кризиса растёт с бот-фермой. Timed-события не выбираются, если уже есть активный таймер. */
+export function pickWeightedEventId(save, now = Date.now()) {
+  const botfarm = save.upgrades?.botfarm || 0;
+  const blockTimed = hasActiveTimedEvent(save, now);
+  const weights = [
+    { id: 'muskTweet', weight: 1 },
+    {
+      id: 'parentsBan',
+      weight: 1 + botfarm * BOTFARM_CRISIS_CHANCE_PER_LEVEL * 50,
+    },
+    { id: 'copyright', weight: 1 },
+    { id: 'memeTwist', weight: 1 },
+  ].filter((item) => {
+    if (!blockTimed) return true;
+    return (EVENTS[item.id]?.durationMs ?? 0) === 0;
+  });
+
+  if (weights.length === 0) return null;
+
+  const total = weights.reduce((sum, w) => sum + w.weight, 0);
+  let roll = Math.random() * total;
+  for (const item of weights) {
+    roll -= item.weight;
+    if (roll <= 0) return item.id;
+  }
+  return weights[0].id;
+}
+
 /**
- * Пассивный доход Эхо/сек (целое число).
+ * Запускает случайное событие.
+ * @returns {{ save: object, toast: object|null }}
+ */
+export function triggerRandomEvent(save, now = Date.now()) {
+  let next = pruneActiveEvents(save, now);
+  const eventId = pickWeightedEventId(next, now);
+  if (!eventId) {
+    return { save: next, toast: null };
+  }
+
+  const def = EVENTS[eventId];
+
+  const toast = {
+    id: `${eventId}-${now}`,
+    eventId,
+    type: def.type,
+    title: def.title,
+    description: def.description,
+    endsAt: def.durationMs > 0 ? now + def.durationMs : null,
+  };
+
+  if (def.echoLossPercent) {
+    const loss = Math.floor(Math.floor(next.echo || 0) * def.echoLossPercent);
+    next = { ...next, echo: Math.max(0, Math.floor(next.echo || 0) - loss) };
+    toast.description = loss > 0 ? `Списано ${loss} Эха` : 'Списывать было нечего';
+  }
+
+  if (def.durationMs > 0) {
+    const endsAt = now + def.durationMs;
+    next = {
+      ...next,
+      activeEvents: [{ id: eventId, endsAt }],
+    };
+    toast.endsAt = endsAt;
+  }
+
+  return { save: next, toast };
+}
+
+/**
+ * Пассивный доход Эхо/сек (целое число, без множителей событий).
  * @param {{ upgrades: Record<string, number>, totalClicks: number }} save
  */
 export function calcEchoPerSec(save) {
@@ -267,6 +417,14 @@ export function calcEchoPerSec(save) {
     ((upgrades.merch || 0) * (totalClicks || 0)) / UPGRADE_RATES.merchClicksPerEcho,
   );
   return kids + botfarm + merch;
+}
+
+export function calcEchoPerSecWithEvents(save, now = Date.now()) {
+  return scaleIncome(calcEchoPerSec(save), getIncomeMultiplier(save, now));
+}
+
+export function calcClickValueWithEvents(save, now = Date.now()) {
+  return scaleIncome(calcClickValue(save), getIncomeMultiplier(save, now));
 }
 
 /** Начисление за elapsedMs офлайн/тик — всегда целое */

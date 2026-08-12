@@ -1,0 +1,73 @@
+.event-toast-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem;
+  padding-top: 4rem;
+  background-color: rgba(17, 17, 17, 0.45);
+  z-index: 120;
+}
+
+.event-toast {
+  max-width: 22rem;
+  width: 100%;
+  padding: 1.25rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-alert);
+  color: var(--color-ink);
+  text-align: center;
+  transform: rotate(-1deg);
+}
+
+.event-toast--crisis {
+  background-color: #111111;
+  color: #f4ff3d;
+  border-color: #f4ff3d;
+}
+
+.event-toast__icon {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.event-toast__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.event-toast__desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.event-toast__timer {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-numbers);
+  font-size: 1rem;
+}
+
+.event-toast__btn {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  padding: 0.6rem 1.25rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.event-toast--crisis .event-toast__btn {
+  border-color: #f4ff3d;
+  background-color: #f4ff3d;
+  color: #111111;
+}
+
+.event-toast__btn:active {
+  transform: scale(0.96);
+}
