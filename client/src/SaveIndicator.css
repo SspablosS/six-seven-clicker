@@ -1,0 +1,29 @@
+.save-indicator {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 50;
+  padding: 0.45rem 0.75rem;
+  border: 3px solid var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  line-height: 1;
+  transform: rotate(1.5deg);
+  pointer-events: none;
+}
+
+.save-indicator--saving {
+  background-color: var(--color-alert);
+  color: var(--color-ink);
+}
+
+.save-indicator--saved {
+  background-color: var(--color-success);
+  color: var(--color-ink);
+}
+
+.save-indicator--error {
+  background-color: #111111;
+  color: #f4ff3d;
+  border-color: #f4ff3d;
+}

@@ -24,6 +24,7 @@ import { BRAND_NAME, ECHO_LABEL } from './constants'
 import EventToast from './EventToast'
 import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
+import SaveIndicator from './SaveIndicator'
 import StageCutscene from './StageCutscene'
 import UpgradePanel from './UpgradePanel'
 import { formatNumber } from './utils/formatNumber'
@@ -31,7 +32,9 @@ import './App.css'
 
 const ATTENTION_LABEL = 'Внимание'
 const REBIRTH_LABEL = 'Переродиться'
-const PERSIST_INTERVAL_MS = 15000
+/** AC US-6.1: автосохранение каждые 15–30 сек */
+const PERSIST_INTERVAL_MS = 20_000
+const SAVED_FLASH_MS = 2500
 
 function themeStyle(stage) {
   const theme = getStageTheme(stage)
@@ -55,26 +58,48 @@ function App() {
   const [error, setError] = useState(null)
   const [floaters, setFloaters] = useState([])
   const [hydrated, setHydrated] = useState(false)
+  const [saveStatus, setSaveStatus] = useState('idle')
   const playerIdRef = useRef(null)
   const saveRef = useRef(null)
   const prevStageRef = useRef(null)
   const dirtyRef = useRef(false)
   const skipNextPersistRef = useRef(true)
+  const savedFlashRef = useRef(null)
+  const flushSaveRef = useRef(() => {})
 
   function markDirty() {
     dirtyRef.current = true
   }
 
-  function flushSave() {
+  function flashSaved() {
+    setSaveStatus('saved')
+    if (savedFlashRef.current) window.clearTimeout(savedFlashRef.current)
+    savedFlashRef.current = window.setTimeout(() => {
+      setSaveStatus('idle')
+    }, SAVED_FLASH_MS)
+  }
+
+  async function persistNow(nextSave, { silent = false } = {}) {
+    const playerId = playerIdRef.current
+    if (!playerId || !nextSave) return
+
+    if (!silent) setSaveStatus('saving')
+    try {
+      await persistSave(playerId, nextSave)
+      dirtyRef.current = false
+      if (!silent) flashSaved()
+    } catch (err) {
+      dirtyRef.current = true
+      console.error(err)
+      if (!silent) setSaveStatus('error')
+    }
+  }
+
+  flushSaveRef.current = (options = {}) => {
     const current = saveRef.current
     const playerId = playerIdRef.current
     if (!current || !playerId || !dirtyRef.current) return
-
-    dirtyRef.current = false
-    persistSave(playerId, current).catch((err) => {
-      dirtyRef.current = true
-      console.error(err)
-    })
+    persistNow(current, options)
   }
 
   useEffect(() => {
@@ -128,19 +153,28 @@ function App() {
   useEffect(() => {
     if (!hydrated) return undefined
 
-    const timer = window.setInterval(flushSave, PERSIST_INTERVAL_MS)
+    const timer = window.setInterval(() => {
+      flushSaveRef.current({ silent: false })
+    }, PERSIST_INTERVAL_MS)
 
     function onVisibilityChange() {
-      if (document.visibilityState === 'hidden') flushSave()
+      if (document.visibilityState === 'hidden') {
+        flushSaveRef.current({ silent: true })
+      }
     }
 
-    window.addEventListener('beforeunload', flushSave)
+    function onBeforeUnload() {
+      flushSaveRef.current({ silent: true })
+    }
+
+    window.addEventListener('beforeunload', onBeforeUnload)
     document.addEventListener('visibilitychange', onVisibilityChange)
 
     return () => {
       window.clearInterval(timer)
-      window.removeEventListener('beforeunload', flushSave)
+      window.removeEventListener('beforeunload', onBeforeUnload)
       document.removeEventListener('visibilitychange', onVisibilityChange)
+      if (savedFlashRef.current) window.clearTimeout(savedFlashRef.current)
     }
   }, [hydrated])
 
@@ -223,14 +257,7 @@ function App() {
       if (!bought) return prev
       dirtyRef.current = true
       saveRef.current = bought
-      const playerId = playerIdRef.current
-      if (playerId) {
-        persistSave(playerId, bought)
-          .then(() => {
-            dirtyRef.current = false
-          })
-          .catch((err) => console.error(err))
-      }
+      persistNow(bought)
       return bought
     })
   }
@@ -242,14 +269,7 @@ function App() {
       if (!next) return prev
       dirtyRef.current = true
       saveRef.current = next
-      const playerId = playerIdRef.current
-      if (playerId) {
-        persistSave(playerId, next)
-          .then(() => {
-            dirtyRef.current = false
-          })
-          .catch((err) => console.error(err))
-      }
+      persistNow(next)
       return next
     })
   }
@@ -264,6 +284,7 @@ function App() {
 
   return (
     <main className="app" data-stage={stage} style={themeVars}>
+      <SaveIndicator status={saveStatus} />
       <p className="brand">{BRAND_NAME}</p>
       {stageName && <h1 className="title">{stageName}</h1>}
       {error && <p className="status">Ошибка: {error}</p>}
