@@ -1,12 +1,7 @@
+import { formatNumber } from './utils/formatNumber'
 import './OfflineModal.css'
 
-const OFFLINE_MODAL_TITLE = 'Пока тебя не было, культ заработал';
-
-function formatEcho(value) {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return Number(value).toFixed(value >= 10 ? 0 : 1);
-}
+const OFFLINE_MODAL_TITLE = 'Пока тебя не было, культ заработал'
 
 export default function OfflineModal({ echoEarned, onClose }) {
   return (
@@ -14,7 +9,7 @@ export default function OfflineModal({ echoEarned, onClose }) {
       <div className="offline-modal">
         <p className="offline-text">
           {OFFLINE_MODAL_TITLE}{' '}
-          <span className="offline-amount">{formatEcho(echoEarned)}</span> Эха
+          <span className="offline-amount">{formatNumber(echoEarned)}</span> Эха
         </p>
         <button type="button" className="offline-btn" onClick={onClose}>
           Забрать
