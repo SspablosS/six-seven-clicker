@@ -1,7 +1,8 @@
-import { OFFLINE_CAP_MS, calcEchoPerSec } from '../config/gameConfig.js';
+import { OFFLINE_CAP_MS, calcEchoEarned } from '../config/gameConfig.js';
 
 /**
  * Считает офлайн-доход и возвращает обновлённое сохранение.
+ * Эхо всегда целое; дроби отсекаются.
  * @returns {{ save: object, offlineEarned: number }}
  */
 export function applyOfflineEarnings(save) {
@@ -9,22 +10,19 @@ export function applyOfflineEarnings(save) {
   const lastSeen = Date.parse(save.lastSeenAt);
   let offlineEarned = 0;
 
+  const baseEcho = Math.floor(save.echo || 0);
+
   if (Number.isFinite(lastSeen) && lastSeen < now) {
     const elapsedMs = Math.min(now - lastSeen, OFFLINE_CAP_MS);
-    const echoPerSec = calcEchoPerSec(save);
-    offlineEarned = echoPerSec * (elapsedMs / 1000);
-    if (offlineEarned > 0) {
-      save = {
-        ...save,
-        echo: (save.echo || 0) + offlineEarned,
-      };
-    }
+    offlineEarned = calcEchoEarned(save, elapsedMs);
   }
 
-  save = {
-    ...save,
-    lastSeenAt: new Date(now).toISOString(),
+  return {
+    save: {
+      ...save,
+      echo: baseEcho + offlineEarned,
+      lastSeenAt: new Date(now).toISOString(),
+    },
+    offlineEarned,
   };
-
-  return { save, offlineEarned };
 }

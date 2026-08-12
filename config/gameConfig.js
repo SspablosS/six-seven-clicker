@@ -21,12 +21,15 @@ export function getStageName(stage) {
 /** Мегафон: +Эхо за клик за уровень */
 export const MEGAPHONE_PER_LEVEL = 1;
 
-/** Пассивный доход */
+/** Пассивный доход (целые Эхо/сек) */
 export const UPGRADE_RATES = {
-  kids: 0.5,
-  botfarm: 1,
-  merchClickFactor: 0.0001,
+  kids: 1,
+  botfarm: 2,
+  /** merch: floor(level * totalClicks / MERCH_CLICKS_PER_ECHO) */
+  merchClicksPerEcho: 100,
 };
+
+export const TICK_MS = 1000;
 
 /** Бот-ферма: +% к шансу кризиса за уровень (для E4) */
 export const BOTFARM_CRISIS_CHANCE_PER_LEVEL = 0.02;
@@ -89,7 +92,7 @@ export const UPGRADES = [
     id: 'merch',
     name: 'Мерч-линия',
     icon: 'Р',
-    description: 'Доход от totalClicks за всё время',
+    description: 'Доход растёт с totalClicks',
     basePrice: 750,
     badgeIndex: 2,
     rotate: 1,
@@ -113,16 +116,23 @@ export function calcClickValue(save) {
 }
 
 /**
- * Пассивный доход Эхо/сек по текущему состоянию сохранения.
+ * Пассивный доход Эхо/сек (целое число).
  * @param {{ upgrades: Record<string, number>, totalClicks: number }} save
  */
 export function calcEchoPerSec(save) {
   const { upgrades, totalClicks } = save;
   const kids = (upgrades.kids || 0) * UPGRADE_RATES.kids;
   const botfarm = (upgrades.botfarm || 0) * UPGRADE_RATES.botfarm;
-  const merch =
-    (upgrades.merch || 0) * (totalClicks || 0) * UPGRADE_RATES.merchClickFactor;
+  const merch = Math.floor(
+    ((upgrades.merch || 0) * (totalClicks || 0)) / UPGRADE_RATES.merchClicksPerEcho,
+  );
   return kids + botfarm + merch;
+}
+
+/** Начисление за elapsedMs офлайн/тик — всегда целое */
+export function calcEchoEarned(save, elapsedMs) {
+  if (elapsedMs <= 0) return 0;
+  return Math.floor(calcEchoPerSec(save) * (elapsedMs / 1000));
 }
 
 export function isAttentionUnlocked(save) {
@@ -153,7 +163,7 @@ export function purchaseUpgrade(save, upgradeId) {
 
   return {
     ...save,
-    echo: save.echo - price,
+    echo: Math.floor(save.echo - price),
     attention,
     upgrades: nextUpgrades,
   };
