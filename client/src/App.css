@@ -9,6 +9,18 @@
   gap: 1rem;
 }
 
+.brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  background-color: var(--color-alert);
+  border: 3px solid var(--color-ink);
+  padding: 0.35rem 0.75rem;
+  transform: rotate(-1.5deg);
+}
+
 .title {
   margin: 0;
   font-family: var(--font-display);
@@ -16,11 +28,6 @@
   -webkit-text-stroke: 1.5px var(--color-ink);
   paint-order: stroke fill;
   color: var(--color-surface);
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 1.125rem;
 }
 
 .status {

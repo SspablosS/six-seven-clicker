@@ -4,6 +4,19 @@ export const OFFLINE_CAP_MS = 8 * 60 * 60 * 1000; // 8 часов
 
 export const BASE_CLICK_VALUE = 1;
 
+/** Этапы культа (id === save.stage) */
+export const STAGES = {
+  1: { id: 1, name: 'Школьный двор' },
+  2: { id: 2, name: 'TikTok-вирус' },
+  3: { id: 3, name: 'Федеральные новости' },
+  4: { id: 4, name: 'Мировой культ' },
+  5: { id: 5, name: 'Числовая сингулярность' },
+};
+
+export function getStageName(stage) {
+  return STAGES[stage]?.name ?? STAGES[1].name;
+}
+
 /** Базовые ставки пассивного дохода (Эхо/сек за уровень) — уточним в E3 */
 export const UPGRADE_RATES = {
   kids: 0.5,

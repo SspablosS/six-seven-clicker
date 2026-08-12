@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { BASE_CLICK_VALUE } from '../../config/gameConfig.js'
+import { BASE_CLICK_VALUE, getStageName } from '../../config/gameConfig.js'
 import { loadSave } from './api/saveApi'
 import ClickButton from './ClickButton'
-import { ECHO_LABEL } from './constants'
+import { BRAND_NAME, ECHO_LABEL } from './constants'
 import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
 import { formatNumber } from './utils/formatNumber'
@@ -46,10 +46,12 @@ function App() {
     }, 800)
   }
 
+  const stageName = save ? getStageName(save.stage) : null
+
   return (
     <main className="app">
-      <h1 className="title">Церковь Шесть-Семь</h1>
-      <p className="subtitle">Кликер-тайкун вокруг мема 6-7</p>
+      <p className="brand">{BRAND_NAME}</p>
+      {stageName && <h1 className="title">{stageName}</h1>}
       {error && <p className="status">Ошибка: {error}</p>}
       {save && (
         <>
