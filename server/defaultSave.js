@@ -17,6 +17,7 @@ export function createDefaultSave(playerId) {
     rebirths: 0,
     lifetimeEcho: 0,
     activeEvents: [],
+    selectedSkin: 'classic',
     lastSeenAt: new Date().toISOString(),
   };
 }

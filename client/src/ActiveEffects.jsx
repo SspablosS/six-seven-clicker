@@ -1,4 +1,4 @@
-import { EVENTS } from '../../config/gameConfig.js'
+import { getEffectDef } from '../../config/gameConfig.js'
 import './ActiveEffects.css'
 
 export default function ActiveEffects({ activeEvents, now }) {
@@ -8,7 +8,7 @@ export default function ActiveEffects({ activeEvents, now }) {
   return (
     <ul className="effects" aria-label="Активные эффекты">
       {alive.map((entry) => {
-        const def = EVENTS[entry.id]
+        const def = getEffectDef(entry.id)
         const sec = Math.max(0, Math.ceil((entry.endsAt - now) / 1000))
         const name = def?.title ?? entry.id
         return (

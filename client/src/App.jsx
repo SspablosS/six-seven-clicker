@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   TICK_MS,
+  AD_BOOST,
   addEcho,
+  applyAdBoost,
   applyStageProgress,
   calcClickValueWithEvents,
   calcEchoPerSecWithEvents,
@@ -22,6 +24,7 @@ import ActiveEffects from './ActiveEffects'
 import ClickButton from './ClickButton'
 import { BRAND_NAME, ECHO_LABEL } from './constants'
 import EventToast from './EventToast'
+import MonetizationPanel from './MonetizationPanel'
 import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
 import SaveIndicator from './SaveIndicator'
@@ -274,6 +277,21 @@ function App() {
     })
   }
 
+  function handleSelectSkin(skinId) {
+    setSave((prev) => {
+      if (!prev) return prev
+      return { ...prev, selectedSkin: skinId }
+    })
+  }
+
+  function handleAdBoost() {
+    setSave((prev) => {
+      if (!prev) return prev
+      return applyAdBoost(prev)
+    })
+    setNow(Date.now())
+  }
+
   const stage = save?.stage || 1
   const stageName = save ? getStageName(save.stage) : null
   const clickValue = save ? calcClickValueWithEvents(save, now) : 0
@@ -281,6 +299,11 @@ function App() {
     ? getResourceLabel(save, ECHO_LABEL, now)
     : ECHO_LABEL
   const themeVars = useMemo(() => themeStyle(stage), [stage])
+  const adBoostActive = Boolean(
+    save?.activeEvents?.some(
+      (e) => e.id === AD_BOOST.id && e.endsAt > now,
+    ),
+  )
 
   return (
     <main className="app" data-stage={stage} style={themeVars}>
@@ -310,7 +333,10 @@ function App() {
           <p className="click-power">за клик: +{formatNumber(clickValue)}</p>
 
           <div className="click-zone">
-            <ClickButton onShout={handleShout} />
+            <ClickButton
+              onShout={handleShout}
+              skinId={save.selectedSkin || 'classic'}
+            />
             {floaters.map((f) => (
               <span
                 key={f.id}
@@ -327,6 +353,13 @@ function App() {
               {REBIRTH_LABEL}
             </button>
           )}
+
+          <MonetizationPanel
+            save={save}
+            onSelectSkin={handleSelectSkin}
+            onAdBoost={handleAdBoost}
+            adBlocked={adBoostActive}
+          />
 
           <UpgradePanel save={save} onBuy={handleBuy} />
         </>

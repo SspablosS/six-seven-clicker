@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { SHOUT_BUTTON_LABEL } from './constants'
 import './ClickButton.css'
 
-export default function ClickButton({ onShout }) {
+export default function ClickButton({ onShout, skinId = 'classic' }) {
   const [pressed, setPressed] = useState(false)
 
   function handleClick() {
@@ -14,7 +14,7 @@ export default function ClickButton({ onShout }) {
   return (
     <button
       type="button"
-      className={`click-btn${pressed ? ' click-btn--pressed' : ''}`}
+      className={`click-btn click-btn--skin-${skinId}${pressed ? ' click-btn--pressed' : ''}`}
       onClick={handleClick}
       aria-label={SHOUT_BUTTON_LABEL}
     >

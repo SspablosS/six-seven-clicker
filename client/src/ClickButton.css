@@ -32,6 +32,27 @@
   margin: 0 auto;
 }
 
+.click-btn--skin-classic {
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+}
+
+.click-btn--skin-gold {
+  background-color: #f4ff3d;
+  color: #111111;
+}
+
+.click-btn--skin-void {
+  background-color: #111111;
+  color: #a855f7;
+  border-color: #a855f7;
+}
+
+.click-btn--skin-mint {
+  background-color: #3dffc0;
+  color: #111111;
+}
+
 @media (min-width: 768px) {
   .click-btn {
     width: min(240px, 28vw);

@@ -26,6 +26,52 @@ export const NEWS_ATTENTION_PER_LEVEL = 1;
 export const EVENT_INTERVAL_MIN_MS = 20_000;
 export const EVENT_INTERVAL_MAX_MS = 60_000;
 
+/** Рекламный буст (монетизация US-8.1) — реальный эффект ×2 */
+export const AD_BOOST = {
+  id: 'adBoost',
+  type: 'bonus',
+  icon: '▶',
+  title: 'Рекламный буст ×2',
+  description: 'Доход ×2 на 5 минут',
+  durationMs: 5 * 60 * 1000,
+  incomeMult: 2,
+  watchMs: 3000,
+};
+
+/** Моки магазина — без реальной оплаты */
+export const MONETIZATION = {
+  pass: {
+    id: 'preacherPass',
+    name: 'Абонемент «Проповедник»',
+    price: '299 ₽ / сезон',
+    bonuses: [
+      '+10% Эхо за клик',
+      'Уникальный скин кафедры',
+      'Ежедневный сундук с мемами',
+    ],
+  },
+  skins: [
+    { id: 'classic', name: 'Классика', swatch: '#3b82ff' },
+    { id: 'gold', name: 'Золотой мегафон', swatch: '#f4ff3d' },
+    { id: 'void', name: 'Пустотный культ', swatch: '#a855f7' },
+    { id: 'mint', name: 'Мятный хор', swatch: '#3dffc0' },
+  ],
+  removeAds: {
+    id: 'removeAds',
+    name: 'Без рекламы',
+    price: '149 ₽',
+  },
+};
+
+export function applyAdBoost(save, now = Date.now()) {
+  const endsAt = now + AD_BOOST.durationMs;
+  const rest = (save.activeEvents || []).filter((e) => e.id !== AD_BOOST.id);
+  return {
+    ...save,
+    activeEvents: [...rest, { id: AD_BOOST.id, endsAt }],
+  };
+}
+
 export const EVENTS = {
   muskTweet: {
     id: 'muskTweet',
@@ -65,6 +111,12 @@ export const EVENTS = {
     resourceLabel: '7-8',
   },
 };
+
+export const EFFECT_DEFS = { ...EVENTS, [AD_BOOST.id]: AD_BOOST };
+
+export function getEffectDef(id) {
+  return EFFECT_DEFS[id] ?? null;
+}
 
 /**
  * Этапы культа.
@@ -308,7 +360,7 @@ export function pruneActiveEvents(save, now = Date.now()) {
 export function getIncomeMultiplier(save, now = Date.now()) {
   const active = pruneActiveEvents(save, now).activeEvents || [];
   return active.reduce((mult, entry) => {
-    const def = EVENTS[entry.id];
+    const def = getEffectDef(entry.id);
     return mult * (def?.incomeMult ?? 1);
   }, 1);
 }
