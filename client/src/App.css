@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
-  padding: 2rem;
+  padding: 2rem 1rem 3rem;
   text-align: center;
   gap: 1rem;
 }
@@ -43,6 +43,51 @@
   padding: 0.75rem 1.5rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-surface);
+  transform: rotate(1deg);
+}
+
+.resource-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.attention-counter {
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-alert);
+  transform: rotate(-1deg);
+}
+
+.attention-counter__value {
+  display: block;
+  font-family: var(--font-numbers);
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+
+.click-power {
+  margin: 0;
+  font-family: var(--font-numbers);
+  font-size: 0.95rem;
+  padding: 0.25rem 0.6rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-success);
+  transform: rotate(-0.5deg);
+}
+
+.rebirth-btn {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-ink);
+  color: var(--color-alert);
+  cursor: not-allowed;
+  opacity: 0.85;
   transform: rotate(1deg);
 }
 

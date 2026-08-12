@@ -1,0 +1,121 @@
+.upgrades {
+  width: min(960px, 100%);
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.upgrades__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.upgrades__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  -webkit-text-stroke: 1px var(--color-ink);
+  paint-order: stroke fill;
+  color: var(--color-surface);
+}
+
+.upgrades__rate {
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-success);
+  font-family: var(--font-numbers);
+  font-size: 0.95rem;
+  transform: rotate(1deg);
+}
+
+.upgrades__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.upgrade-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+}
+
+.upgrade-card__badge {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 3px solid var(--color-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+.badge--alert {
+  background-color: var(--color-alert);
+}
+
+.badge--accent {
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+}
+
+.badge--bg {
+  background-color: var(--color-bg);
+  color: var(--color-surface);
+}
+
+.upgrade-card__body {
+  flex: 1;
+}
+
+.upgrade-card__name {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.upgrade-card__desc {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+.upgrade-card__meta {
+  margin: 0;
+  font-family: var(--font-numbers);
+  font-size: 0.9rem;
+}
+
+.upgrade-card__buy {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  padding: 0.65rem 1rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.upgrade-card__buy:disabled {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.upgrade-card__buy:not(:disabled):active {
+  transform: scale(0.96);
+}
