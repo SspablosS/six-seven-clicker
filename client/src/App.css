@@ -3,15 +3,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  padding: 2rem 1rem 3rem;
+  padding: 0.6rem 0.65rem 0.75rem;
   text-align: center;
-  gap: 1rem;
+  gap: 0.4rem;
   background-color: var(--color-bg);
   color: var(--color-ink);
+  overflow-x: hidden;
 }
 
-/* Этап 5: тёмный космос с «звёздами» (лёгкий SVG-паттерн) */
+/* Мобилка: всё влезает в экран, скролл только у улучшений */
+@media (max-width: 767px) {
+  .app {
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Этап 5: тёмный космос с «звёздами» */
 .app[data-stage='5'] {
   background-color: #07070f;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='140'%3E%3Ccircle cx='12' cy='18' r='1.2' fill='%23fff'/%3E%3Ccircle cx='48' cy='62' r='0.8' fill='%23ffffffcc'/%3E%3Ccircle cx='86' cy='28' r='1.1' fill='%23fff'/%3E%3Ccircle cx='130' cy='90' r='0.7' fill='%23ffffffb3'/%3E%3Ccircle cx='170' cy='44' r='1.4' fill='%23fff'/%3E%3Ccircle cx='24' cy='110' r='0.9' fill='%23ffffffd9'/%3E%3Ccircle cx='108' cy='140' r='1.1' fill='%23fff'/%3E%3Ccircle cx='156' cy='160' r='0.7' fill='%23ffffffb3'/%3E%3C/svg%3E");
@@ -20,36 +34,44 @@
 
 .brand {
   margin: 0;
+  max-width: 100%;
   font-family: var(--font-display);
-  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  font-size: clamp(0.75rem, 2.5vw, 1.15rem);
   letter-spacing: 0.02em;
   color: var(--color-ink);
   background-color: var(--color-alert);
   border: 3px solid var(--color-ink);
-  padding: 0.35rem 0.75rem;
+  padding: 0.25rem 0.55rem;
   transform: rotate(-1.5deg);
+  flex-shrink: 0;
 }
 
 .title {
   margin: 0;
+  max-width: 100%;
+  padding: 0 0.25rem;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(1.25rem, 6.5vw, 3.5rem);
   -webkit-text-stroke: 1.5px var(--color-ink);
   paint-order: stroke fill;
   color: var(--color-surface);
+  line-height: 1.1;
+  word-break: break-word;
+  flex-shrink: 0;
 }
 
 .status {
   margin: 0;
-  padding: 0.75rem 1.25rem;
+  padding: 0.5rem 1rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-surface);
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .echo-counter {
   margin: 0;
-  padding: 0.75rem 1.5rem;
+  padding: 0.4rem 0.9rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-surface);
   transform: rotate(1deg);
@@ -58,13 +80,16 @@
 .resource-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.45rem;
   justify-content: center;
+  width: 100%;
+  max-width: 40rem;
+  flex-shrink: 0;
 }
 
 .attention-counter {
   margin: 0;
-  padding: 0.75rem 1.5rem;
+  padding: 0.4rem 0.9rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-alert);
   transform: rotate(-1deg);
@@ -73,7 +98,7 @@
 .attention-counter__value {
   display: block;
   font-family: var(--font-numbers);
-  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  font-size: clamp(1.2rem, 4.5vw, 2.25rem);
   color: var(--color-ink);
   line-height: 1.1;
 }
@@ -81,22 +106,25 @@
 .click-power {
   margin: 0;
   font-family: var(--font-numbers);
-  font-size: 0.95rem;
-  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-success);
   transform: rotate(-0.5deg);
+  flex-shrink: 0;
 }
 
 .rebirth-btn {
   font-family: var(--font-display);
-  font-size: 1rem;
-  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
   border: 3px solid var(--color-ink);
   background-color: var(--color-ink);
   color: var(--color-alert);
   cursor: pointer;
   transform: rotate(1deg);
+  flex-shrink: 0;
 }
 
 .rebirth-btn:active {
@@ -105,7 +133,7 @@
 
 .echo-counter__label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -114,9 +142,9 @@
 .echo-counter__value {
   display: block;
   font-family: var(--font-numbers);
-  font-size: clamp(2rem, 8vw, 3.25rem);
+  font-size: clamp(1.35rem, 6vw, 3.25rem);
   color: var(--color-accent);
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .click-zone {
@@ -124,16 +152,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.5rem;
-  min-height: min(220px, 70vw);
+  width: 100%;
+  margin-top: 0.35rem;
+  margin-bottom: 0.15rem;
+  min-height: 0;
+  flex: 1 1 auto;
 }
+
 
 .floater {
   position: absolute;
   left: 50%;
   top: 30%;
   font-family: var(--font-numbers);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--color-success);
   -webkit-text-stroke: 1px var(--color-ink);
   paint-order: stroke fill;
@@ -150,5 +182,67 @@
   100% {
     opacity: 0;
     transform: translateX(calc(-50% + var(--floater-x, 0px))) translateY(-72px);
+  }
+}
+
+/* Планшет / десктоп — обычный скролл страницы */
+@media (min-width: 768px) {
+  .app {
+    padding: 2rem 1.5rem 3rem;
+    gap: 1rem;
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .brand {
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    padding: 0.35rem 0.75rem;
+  }
+
+  .title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .echo-counter,
+  .attention-counter {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .echo-counter__label {
+    font-size: 0.875rem;
+  }
+
+  .echo-counter__value {
+    font-size: clamp(2rem, 8vw, 3.25rem);
+  }
+
+  .attention-counter__value {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+  }
+
+  .click-power {
+    font-size: 0.95rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .click-zone {
+    min-height: min(220px, 40vw);
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    flex: none;
+  }
+
+  .rebirth-btn {
+    font-size: 1rem;
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app {
+    padding: 2.5rem 2rem 3.5rem;
   }
 }

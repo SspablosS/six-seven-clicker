@@ -10,6 +10,10 @@ const BUY_LABEL = 'Купить'
 const LEVEL_LABEL = 'ур.'
 const BADGE_CLASSES = ['badge--alert', 'badge--accent', 'badge--bg']
 
+function rotateClass(deg) {
+  return `upgrade-card--rot${String(deg).replace('.', '')}`
+}
+
 export default function UpgradePanel({ save, onBuy }) {
   const echoPerSec = calcEchoPerSecWithEvents(save)
   const upgrades = getVisibleUpgrades(save.stage || 1)
@@ -33,8 +37,7 @@ export default function UpgradePanel({ save, onBuy }) {
           return (
             <li
               key={def.id}
-              className="upgrade-card"
-              style={{ transform: `rotate(${def.rotate}deg)` }}
+              className={`upgrade-card ${rotateClass(def.rotate)}`}
             >
               <div className={`upgrade-card__badge ${badgeClass}`} aria-hidden="true">
                 {def.icon}
