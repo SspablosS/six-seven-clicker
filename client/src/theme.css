@@ -1,0 +1,12 @@
+:root {
+  --color-bg: #ff2e93;
+  --color-accent: #3b82ff;
+  --color-success: #3dffc0;
+  --color-alert: #f4ff3d;
+  --color-ink: #111111;
+  --color-surface: #ffffff;
+
+  --font-display: 'Bungee', system-ui, sans-serif;
+  --font-numbers: 'Archivo Black', system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+}
