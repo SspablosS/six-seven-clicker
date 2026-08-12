@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
+  TICK_MS,
   calcClickValue,
+  calcEchoPerSec,
   getStageName,
   isAttentionUnlocked,
   isRebirthUnlocked,
   purchaseUpgrade,
 } from '../../config/gameConfig.js'
-import { loadSave } from './api/saveApi'
+import { loadSave, persistSave } from './api/saveApi'
 import ClickButton from './ClickButton'
 import { BRAND_NAME, ECHO_LABEL } from './constants'
 import OfflineModal from './OfflineModal'
@@ -18,6 +20,7 @@ import './App.css'
 const ATTENTION_LABEL = 'Внимание'
 const REBIRTH_LABEL = 'Переродиться'
 const REBIRTH_SOON = 'Скоро'
+const PERSIST_DEBOUNCE_MS = 400
 
 function App() {
   const [save, setSave] = useState(null)
@@ -25,19 +28,90 @@ function App() {
   const [showOfflineModal, setShowOfflineModal] = useState(false)
   const [error, setError] = useState(null)
   const [floaters, setFloaters] = useState([])
+  const [hydrated, setHydrated] = useState(false)
+  const playerIdRef = useRef(null)
+  const saveRef = useRef(null)
 
   useEffect(() => {
     const playerId = getOrCreatePlayerId()
+    playerIdRef.current = playerId
     loadSave(playerId)
       .then(({ save: nextSave, offlineEarned: earned }) => {
-        setSave(nextSave)
-        if (earned > 0) {
-          setOfflineEarned(earned)
+        const cleaned = {
+          ...nextSave,
+          echo: Math.floor(nextSave.echo || 0),
+        }
+        setSave(cleaned)
+        if (earned >= 1) {
+          setOfflineEarned(Math.floor(earned))
           setShowOfflineModal(true)
         }
       })
       .catch((err) => setError(err.message))
+      .finally(() => setHydrated(true))
   }, [])
+
+  useEffect(() => {
+    saveRef.current = save
+  }, [save])
+
+  useEffect(() => {
+    if (!hydrated || !save || !playerIdRef.current) return undefined
+
+    const timer = window.setTimeout(() => {
+      persistSave(playerIdRef.current, save).catch((err) => {
+        console.error(err)
+      })
+    }, PERSIST_DEBOUNCE_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [save, hydrated])
+
+  useEffect(() => {
+    function flushSave() {
+      const current = saveRef.current
+      const playerId = playerIdRef.current
+      if (!current || !playerId) return
+
+      fetch(`/api/save/${playerId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(current),
+        keepalive: true,
+      }).catch(() => {})
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === 'hidden') flushSave()
+    }
+
+    window.addEventListener('beforeunload', flushSave)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', flushSave)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [])
+
+  // US-3.2: пассивный доход капает раз в секунду во время игры
+  useEffect(() => {
+    if (!hydrated) return undefined
+
+    const timer = window.setInterval(() => {
+      setSave((prev) => {
+        if (!prev) return prev
+        const gain = calcEchoPerSec(prev)
+        if (gain <= 0) return prev
+        return {
+          ...prev,
+          echo: Math.floor(prev.echo) + gain,
+        }
+      })
+    }, TICK_MS)
+
+    return () => window.clearInterval(timer)
+  }, [hydrated])
 
   function handleShout() {
     if (!save) return
@@ -45,7 +119,7 @@ function App() {
     const gain = calcClickValue(save)
     setSave((prev) => ({
       ...prev,
-      echo: prev.echo + gain,
+      echo: Math.floor(prev.echo) + gain,
       totalClicks: prev.totalClicks + 1,
     }))
 
