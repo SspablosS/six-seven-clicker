@@ -1,7 +1,7 @@
 import {
   calcEchoPerSec,
   calcUpgradePrice,
-  UPGRADES,
+  getVisibleUpgrades,
 } from '../../config/gameConfig.js'
 import { formatNumber } from './utils/formatNumber'
 import './UpgradePanel.css'
@@ -12,6 +12,7 @@ const BADGE_CLASSES = ['badge--alert', 'badge--accent', 'badge--bg']
 
 export default function UpgradePanel({ save, onBuy }) {
   const echoPerSec = calcEchoPerSec(save)
+  const upgrades = getVisibleUpgrades(save.stage || 1)
 
   return (
     <section className="upgrades" aria-label="Улучшения">
@@ -23,7 +24,7 @@ export default function UpgradePanel({ save, onBuy }) {
       </header>
 
       <ul className="upgrades__grid">
-        {UPGRADES.map((def) => {
+        {upgrades.map((def) => {
           const level = save.upgrades?.[def.id] || 0
           const price = calcUpgradePrice(def.id, level)
           const canBuy = save.echo >= price

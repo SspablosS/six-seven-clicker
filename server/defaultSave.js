@@ -15,6 +15,7 @@ export function createDefaultSave(playerId) {
       merch: 0,
     },
     rebirths: 0,
+    lifetimeEcho: 0,
     activeEvents: [],
     lastSeenAt: new Date().toISOString(),
   };

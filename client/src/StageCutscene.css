@@ -1,0 +1,49 @@
+.cutscene-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(17, 17, 17, 0.6);
+  z-index: 110;
+  padding: 1rem;
+}
+
+.cutscene-modal {
+  max-width: 26rem;
+  width: 100%;
+  padding: 1.5rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+  text-align: center;
+  transform: rotate(-1.5deg);
+}
+
+.cutscene-stage {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  -webkit-text-stroke: 1px var(--color-ink);
+  paint-order: stroke fill;
+  color: var(--color-accent);
+}
+
+.cutscene-text {
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.cutscene-btn {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-alert);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.cutscene-btn:active {
+  transform: scale(0.96);
+}

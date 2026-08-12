@@ -1,4 +1,4 @@
-import { OFFLINE_CAP_MS, calcEchoEarned } from '../config/gameConfig.js';
+import { OFFLINE_CAP_MS, addEcho, applyStageProgress, calcEchoEarned } from '../config/gameConfig.js';
 
 /**
  * Считает офлайн-доход и возвращает обновлённое сохранение.
@@ -10,17 +10,25 @@ export function applyOfflineEarnings(save) {
   const lastSeen = Date.parse(save.lastSeenAt);
   let offlineEarned = 0;
 
-  const baseEcho = Math.floor(save.echo || 0);
+  let next = {
+    ...save,
+    echo: Math.floor(save.echo || 0),
+    lifetimeEcho: Math.floor(save.lifetimeEcho || 0),
+  };
 
   if (Number.isFinite(lastSeen) && lastSeen < now) {
     const elapsedMs = Math.min(now - lastSeen, OFFLINE_CAP_MS);
-    offlineEarned = calcEchoEarned(save, elapsedMs);
+    offlineEarned = calcEchoEarned(next, elapsedMs);
+    if (offlineEarned > 0) {
+      next = addEcho(next, offlineEarned);
+    }
   }
+
+  next = applyStageProgress(next).save;
 
   return {
     save: {
-      ...save,
-      echo: baseEcho + offlineEarned,
+      ...next,
       lastSeenAt: new Date(now).toISOString(),
     },
     offlineEarned,

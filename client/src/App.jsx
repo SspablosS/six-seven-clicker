@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   TICK_MS,
+  addEcho,
+  applyStageProgress,
   calcClickValue,
   calcEchoPerSec,
+  getStageDef,
   getStageName,
+  getStageTheme,
   isAttentionUnlocked,
   isRebirthUnlocked,
+  performRebirth,
   purchaseUpgrade,
 } from '../../config/gameConfig.js'
 import { loadSave, persistSave } from './api/saveApi'
@@ -13,34 +18,74 @@ import ClickButton from './ClickButton'
 import { BRAND_NAME, ECHO_LABEL } from './constants'
 import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
+import StageCutscene from './StageCutscene'
 import UpgradePanel from './UpgradePanel'
 import { formatNumber } from './utils/formatNumber'
 import './App.css'
 
 const ATTENTION_LABEL = 'Внимание'
 const REBIRTH_LABEL = 'Переродиться'
-const REBIRTH_SOON = 'Скоро'
-const PERSIST_DEBOUNCE_MS = 400
+/** Не чаще раза в N мс — иначе каждый тик пассива долбит диск */
+const PERSIST_INTERVAL_MS = 15000
+
+function themeStyle(stage) {
+  const theme = getStageTheme(stage)
+  return {
+    '--color-bg': theme.bg,
+    '--color-accent': theme.accent,
+    '--color-success': theme.success,
+    '--color-alert': theme.alert,
+    '--color-ink': theme.ink,
+    '--color-surface': theme.surface,
+  }
+}
 
 function App() {
   const [save, setSave] = useState(null)
   const [offlineEarned, setOfflineEarned] = useState(0)
   const [showOfflineModal, setShowOfflineModal] = useState(false)
+  const [cutscene, setCutscene] = useState(null)
   const [error, setError] = useState(null)
   const [floaters, setFloaters] = useState([])
   const [hydrated, setHydrated] = useState(false)
   const playerIdRef = useRef(null)
   const saveRef = useRef(null)
+  const prevStageRef = useRef(null)
+  const dirtyRef = useRef(false)
+  const skipNextPersistRef = useRef(true)
+
+  function markDirty() {
+    dirtyRef.current = true
+  }
+
+  function flushSave() {
+    const current = saveRef.current
+    const playerId = playerIdRef.current
+    if (!current || !playerId || !dirtyRef.current) return
+
+    dirtyRef.current = false
+    persistSave(playerId, current).catch((err) => {
+      dirtyRef.current = true
+      console.error(err)
+    })
+  }
 
   useEffect(() => {
     const playerId = getOrCreatePlayerId()
     playerIdRef.current = playerId
     loadSave(playerId)
       .then(({ save: nextSave, offlineEarned: earned }) => {
-        const cleaned = {
+        let cleaned = {
           ...nextSave,
           echo: Math.floor(nextSave.echo || 0),
+          lifetimeEcho: Math.floor(
+            nextSave.lifetimeEcho || nextSave.echo || 0,
+          ),
         }
+        cleaned = applyStageProgress(cleaned).save
+        prevStageRef.current = cleaned.stage || 1
+        skipNextPersistRef.current = true
+        dirtyRef.current = false
         setSave(cleaned)
         if (earned >= 1) {
           setOfflineEarned(Math.floor(earned))
@@ -52,34 +97,31 @@ function App() {
   }, [])
 
   useEffect(() => {
-    saveRef.current = save
-  }, [save])
+    if (!save) return
+    const stage = save.stage || 1
+    const prev = prevStageRef.current
+    if (prev != null && stage > prev) {
+      const def = getStageDef(stage)
+      setCutscene({ stage, text: def.cutscene })
+    }
+    prevStageRef.current = stage
+  }, [save?.stage])
 
   useEffect(() => {
-    if (!hydrated || !save || !playerIdRef.current) return undefined
-
-    const timer = window.setTimeout(() => {
-      persistSave(playerIdRef.current, save).catch((err) => {
-        console.error(err)
-      })
-    }, PERSIST_DEBOUNCE_MS)
-
-    return () => window.clearTimeout(timer)
+    saveRef.current = save
+    if (!save || !hydrated) return
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false
+      return
+    }
+    markDirty()
   }, [save, hydrated])
 
+  // Редкое автосохранение + flush при уходе со вкладки
   useEffect(() => {
-    function flushSave() {
-      const current = saveRef.current
-      const playerId = playerIdRef.current
-      if (!current || !playerId) return
+    if (!hydrated) return undefined
 
-      fetch(`/api/save/${playerId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(current),
-        keepalive: true,
-      }).catch(() => {})
-    }
+    const timer = window.setInterval(flushSave, PERSIST_INTERVAL_MS)
 
     function onVisibilityChange() {
       if (document.visibilityState === 'hidden') flushSave()
@@ -89,12 +131,12 @@ function App() {
     document.addEventListener('visibilitychange', onVisibilityChange)
 
     return () => {
+      window.clearInterval(timer)
       window.removeEventListener('beforeunload', flushSave)
       document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [])
+  }, [hydrated])
 
-  // US-3.2: пассивный доход капает раз в секунду во время игры
   useEffect(() => {
     if (!hydrated) return undefined
 
@@ -103,10 +145,7 @@ function App() {
         if (!prev) return prev
         const gain = calcEchoPerSec(prev)
         if (gain <= 0) return prev
-        return {
-          ...prev,
-          echo: Math.floor(prev.echo) + gain,
-        }
+        return applyStageProgress(addEcho(prev, gain)).save
       })
     }, TICK_MS)
 
@@ -117,11 +156,12 @@ function App() {
     if (!save) return
 
     const gain = calcClickValue(save)
-    setSave((prev) => ({
-      ...prev,
-      echo: Math.floor(prev.echo) + gain,
-      totalClicks: prev.totalClicks + 1,
-    }))
+    setSave((prev) =>
+      applyStageProgress({
+        ...addEcho(prev, gain),
+        totalClicks: prev.totalClicks + 1,
+      }).save,
+    )
 
     const id = crypto.randomUUID()
     const offsetX = (Math.random() - 0.5) * 80
@@ -134,15 +174,48 @@ function App() {
   function handleBuy(upgradeId) {
     setSave((prev) => {
       if (!prev) return prev
-      return purchaseUpgrade(prev, upgradeId) ?? prev
+      const bought = purchaseUpgrade(prev, upgradeId)
+      if (!bought) return prev
+      dirtyRef.current = true
+      saveRef.current = bought
+      const playerId = playerIdRef.current
+      if (playerId) {
+        persistSave(playerId, bought)
+          .then(() => {
+            dirtyRef.current = false
+          })
+          .catch((err) => console.error(err))
+      }
+      return bought
     })
   }
 
+  function handleRebirth() {
+    setSave((prev) => {
+      if (!prev) return prev
+      const next = performRebirth(prev)
+      if (!next) return prev
+      dirtyRef.current = true
+      saveRef.current = next
+      const playerId = playerIdRef.current
+      if (playerId) {
+        persistSave(playerId, next)
+          .then(() => {
+            dirtyRef.current = false
+          })
+          .catch((err) => console.error(err))
+      }
+      return next
+    })
+  }
+
+  const stage = save?.stage || 1
   const stageName = save ? getStageName(save.stage) : null
   const clickValue = save ? calcClickValue(save) : 0
+  const themeVars = useMemo(() => themeStyle(stage), [stage])
 
   return (
-    <main className="app">
+    <main className="app" data-stage={stage} style={themeVars}>
       <p className="brand">{BRAND_NAME}</p>
       {stageName && <h1 className="title">{stageName}</h1>}
       {error && <p className="status">Ошибка: {error}</p>}
@@ -179,7 +252,7 @@ function App() {
           </div>
 
           {isRebirthUnlocked(save) && (
-            <button type="button" className="rebirth-btn" disabled title={REBIRTH_SOON}>
+            <button type="button" className="rebirth-btn" onClick={handleRebirth}>
               {REBIRTH_LABEL}
             </button>
           )}
@@ -191,6 +264,13 @@ function App() {
         <OfflineModal
           echoEarned={offlineEarned}
           onClose={() => setShowOfflineModal(false)}
+        />
+      )}
+      {cutscene && (
+        <StageCutscene
+          stage={cutscene.stage}
+          text={cutscene.text}
+          onClose={() => setCutscene(null)}
         />
       )}
     </main>
