@@ -1,4 +1,4 @@
-import { getEffectDef } from '../../config/gameConfig.js'
+import { getEffectDef } from '@config/gameConfig.js'
 import './ActiveEffects.css'
 
 export default function ActiveEffects({ activeEvents, now }) {

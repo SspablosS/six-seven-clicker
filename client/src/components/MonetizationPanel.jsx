@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AD_BOOST, MONETIZATION } from '../../config/gameConfig.js'
+import { AD_BOOST, MONETIZATION } from '@config/gameConfig.js'
 import './MonetizationPanel.css'
 
 const SOON_TITLE = 'Скоро!'

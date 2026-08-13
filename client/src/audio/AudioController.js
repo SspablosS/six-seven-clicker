@@ -77,10 +77,6 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, Number(value) || 0));
 }
 
-function getContext() {
-  return audioContext;
-}
-
 function ensureContext() {
   if (!audioContext) {
     const Ctx = window.AudioContext || window.webkitAudioContext;

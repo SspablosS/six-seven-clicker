@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { getStageEchoProgress } from '../../config/gameConfig.js'
-import { formatNumber } from './utils/formatNumber'
+import { getStageEchoProgress } from '@config/gameConfig.js'
+import { formatNumber } from '@/utils/formatNumber'
 import './StageProgressBar.css'
 
 export default function StageProgressBar({ save }) {

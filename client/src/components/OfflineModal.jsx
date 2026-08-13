@@ -1,4 +1,4 @@
-import { formatNumber } from './utils/formatNumber'
+import { formatNumber } from '@/utils/formatNumber'
 import './OfflineModal.css'
 
 const OFFLINE_MODAL_TITLE = 'Пока тебя не было, культ заработал'

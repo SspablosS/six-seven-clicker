@@ -16,10 +16,20 @@ npm run dev
 ## Структура
 
 ```
-client/   — React (Vite)
-server/   — Express API
-config/   — баланс и формулы (gameConfig.js)
+client/          — React (Vite)
+  src/
+    app/         — корневой компонент (App.jsx)
+    components/  — UI-компоненты
+    hooks/       — React-хуки
+    utils/       — утилиты, константы
+    api/         — запросы к серверу
+    audio/       — звук
+    styles/      — глобальные стили
+server/          — Express API
+config/          — баланс и формулы (gameConfig.js)
 ```
+
+Алиасы импортов: `@/` → `client/src/`, `@config/` → `config/`.
 
 ## Данные
 

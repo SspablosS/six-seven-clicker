@@ -23,27 +23,28 @@ import {
   randomEventDelayMs,
   spendAttentionForEvent,
   triggerRandomEvent,
-} from '../../config/gameConfig.js'
-import { buildSaveErrorToast } from '../../config/toastBuilder.js'
-import { loadSave, persistSave } from './api/saveApi'
-import ActiveEffects from './ActiveEffects'
-import ClickButton from './ClickButton'
-import { BRAND_NAME, ECHO_LABEL } from './constants'
-import EventToast from './EventToast'
-import MonetizationPanel from './MonetizationPanel'
-import OfflineModal from './OfflineModal'
-import { getOrCreatePlayerId } from './playerId'
-import SaveIndicator from './SaveIndicator'
-import StageCutscene from './StageCutscene'
-import StageProgressBar from './StageProgressBar'
-import UpgradePanel from './UpgradePanel'
-import { formatNumber } from './utils/formatNumber'
-import AudioControls, { useAudioBootstrap } from './AudioControls'
+} from '@config/gameConfig.js'
+import { buildSaveErrorToast } from '@config/toastBuilder.js'
+import { loadSave, persistSave } from '@/api/saveApi'
+import ActiveEffects from '@/components/ActiveEffects'
+import AudioControls from '@/components/AudioControls'
+import ClickButton from '@/components/ClickButton'
+import EventToast from '@/components/EventToast'
+import MonetizationPanel from '@/components/MonetizationPanel'
+import OfflineModal from '@/components/OfflineModal'
+import SaveIndicator from '@/components/SaveIndicator'
+import StageCutscene from '@/components/StageCutscene'
+import StageProgressBar from '@/components/StageProgressBar'
+import UpgradePanel from '@/components/UpgradePanel'
+import { BRAND_NAME, ECHO_LABEL } from '@/utils/constants'
+import { getOrCreatePlayerId } from '@/utils/playerId'
+import { formatNumber } from '@/utils/formatNumber'
+import { useAudioBootstrap } from '@/hooks/useAudioBootstrap'
 import {
   playClickSound,
   playEventSound,
   playUpgradeSound,
-} from './audio/AudioController'
+} from '@/audio/AudioController'
 import './App.css'
 
 const ATTENTION_LABEL = 'Внимание'

@@ -2,9 +2,9 @@ import {
   calcEchoPerSecWithEvents,
   calcUpgradePrice,
   getVisibleUpgrades,
-} from '../../config/gameConfig.js'
-import { useTapAction } from './utils/tapAction'
-import { formatNumber } from './utils/formatNumber'
+} from '@config/gameConfig.js'
+import { useTapAction } from '@/hooks/useTapAction'
+import { formatNumber } from '@/utils/formatNumber'
 import './UpgradePanel.css'
 
 const BUY_LABEL = 'Купить'

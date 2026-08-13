@@ -1,4 +1,4 @@
-import { EVENTS } from '../../config/gameConfig.js'
+import { EVENTS } from '@config/gameConfig.js'
 import './EventToast.css'
 
 const DISMISS_LABEL = 'Ок'

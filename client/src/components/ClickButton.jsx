@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { SHOUT_BUTTON_LABEL } from './constants'
-import { useTapAction } from './utils/tapAction'
+import { SHOUT_BUTTON_LABEL } from '@/utils/constants'
+import { useTapAction } from '@/hooks/useTapAction'
 import './ClickButton.css'
 
 export default function ClickButton({ onShout, skinId = 'classic' }) {

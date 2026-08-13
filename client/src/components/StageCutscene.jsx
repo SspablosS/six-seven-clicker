@@ -1,4 +1,4 @@
-import { getStageName } from '../../config/gameConfig.js'
+import { getStageName } from '@config/gameConfig.js'
 import './StageCutscene.css'
 
 const CONTINUE_LABEL = 'Дальше'

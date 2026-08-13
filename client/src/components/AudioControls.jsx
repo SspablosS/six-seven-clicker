@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import {
   getSettings,
-  initAudioFromSettings,
   resumeAudio,
   setMusicVolume,
   setSfxVolume,
   subscribe,
   toggleMusic,
   toggleSfx,
-} from './audio/AudioController'
+} from '@/audio/AudioController'
 import './AudioControls.css'
 
 const PANEL_TITLE = 'Звук'
@@ -156,10 +155,4 @@ export default function AudioControls() {
       )}
     </div>
   )
-}
-
-export function useAudioBootstrap() {
-  useEffect(() => {
-    initAudioFromSettings()
-  }, [])
 }
