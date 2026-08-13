@@ -1,3 +1,5 @@
+import { buildEventToast } from './toastBuilder.js';
+
 /** Единый источник правды для баланса игры */
 
 export const OFFLINE_CAP_MS = 8 * 60 * 60 * 1000; // 8 часов
@@ -434,29 +436,23 @@ export function triggerRandomEvent(save, now = Date.now()) {
 
   const def = EVENTS[eventId];
 
-  const toast = {
-    id: `${eventId}-${now}`,
-    eventId,
-    type: def.type,
-    title: def.title,
-    description: def.description,
-    endsAt: def.durationMs > 0 ? now + def.durationMs : null,
-  };
-
+  let echoLoss = null;
   if (def.echoLossPercent) {
     const loss = Math.floor(Math.floor(next.echo || 0) * def.echoLossPercent);
     next = { ...next, echo: Math.max(0, Math.floor(next.echo || 0) - loss) };
-    toast.description = loss > 0 ? `Списано ${loss} Эха` : 'Списывать было нечего';
+    echoLoss = loss;
   }
 
+  let endsAt = null;
   if (def.durationMs > 0) {
-    const endsAt = now + def.durationMs;
+    endsAt = now + def.durationMs;
     next = {
       ...next,
       activeEvents: [{ id: eventId, endsAt }],
     };
-    toast.endsAt = endsAt;
   }
+
+  const toast = buildEventToast({ eventId, def, now, echoLoss, endsAt });
 
   return { save: next, toast };
 }
