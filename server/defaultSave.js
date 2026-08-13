@@ -1,3 +1,5 @@
+import { getDefaultUpgrades } from '../config/gameConfig.js';
+
 /** @param {string} playerId */
 export function createDefaultSave(playerId) {
   return {
@@ -6,14 +8,7 @@ export function createDefaultSave(playerId) {
     attention: 0,
     totalClicks: 0,
     stage: 1,
-    upgrades: {
-      megaphone: 0,
-      kids: 0,
-      botfarm: 0,
-      news: 0,
-      aiGen: 0,
-      merch: 0,
-    },
+    upgrades: getDefaultUpgrades(),
     rebirths: 0,
     lifetimeEcho: 0,
     activeEvents: [],

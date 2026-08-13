@@ -331,6 +331,10 @@ export const UPGRADES = [
   },
 ];
 
+export function getDefaultUpgrades() {
+  return Object.fromEntries(UPGRADES.map((u) => [u.id, 0]));
+}
+
 export function getUpgradeDef(id) {
   return UPGRADES.find((u) => u.id === id);
 }
@@ -533,14 +537,7 @@ export function performRebirth(save) {
     echo: 0,
     attention: 0,
     totalClicks: 0,
-    upgrades: {
-      megaphone: 0,
-      kids: 0,
-      botfarm: 0,
-      news: 0,
-      aiGen: 0,
-      merch: 0,
-    },
+    upgrades: getDefaultUpgrades(),
     rebirths: (save.rebirths || 0) + 1,
     activeEvents: [],
     lifetimeEcho: Math.floor(save.lifetimeEcho || 0),
