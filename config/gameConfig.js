@@ -231,6 +231,65 @@ export function getStageTheme(stage) {
   return getStageDef(stage).theme;
 }
 
+/**
+ * Прогресс к следующему этапу по lifetimeEcho.
+ * @returns {{
+ *   kind: 'progress' | 'max' | 'rebirth',
+ *   percent: number,
+ *   label: string,
+ *   current?: number,
+ *   target?: number,
+ *   nextName?: string,
+ *   attentionBlocked?: boolean,
+ *   requiredAttention?: number,
+ * }}
+ */
+export function getStageEchoProgress(save) {
+  const stage = save.stage || 1;
+  const lifetimeEcho = Math.floor(save.lifetimeEcho || 0);
+  const attention = save.attention || 0;
+  const nextDef = STAGES[stage + 1];
+
+  if (stage >= 5 || !nextDef) {
+    return { kind: 'max', percent: 100, label: 'Максимальный этап' };
+  }
+
+  if (nextDef.minRebirths > 0) {
+    if (isRebirthUnlocked(save)) {
+      return { kind: 'rebirth', percent: 100, label: 'Доступно перерождение!' };
+    }
+    return { kind: 'max', percent: 100, label: 'Максимальный этап' };
+  }
+
+  const from = getStageDef(stage).lifetimeEcho;
+  const to = nextDef.lifetimeEcho;
+  const span = to - from;
+
+  if (span <= 0) {
+    return { kind: 'max', percent: 100, label: 'Максимальный этап' };
+  }
+
+  const percent = Math.min(
+    100,
+    Math.max(0, ((lifetimeEcho - from) / span) * 100),
+  );
+  const echoComplete = lifetimeEcho >= to;
+  const attentionBlocked =
+    nextDef.minAttention > 0 &&
+    echoComplete &&
+    attention < nextDef.minAttention;
+
+  return {
+    kind: 'progress',
+    percent,
+    current: lifetimeEcho,
+    target: to,
+    nextName: nextDef.name,
+    attentionBlocked,
+    requiredAttention: attentionBlocked ? nextDef.minAttention : undefined,
+  };
+}
+
 /** Максимальный этап, доступный по текущему прогрессу */
 export function resolveStage(save) {
   const lifetimeEcho = Math.floor(save.lifetimeEcho || 0);

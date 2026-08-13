@@ -35,6 +35,7 @@ import OfflineModal from './OfflineModal'
 import { getOrCreatePlayerId } from './playerId'
 import SaveIndicator from './SaveIndicator'
 import StageCutscene from './StageCutscene'
+import StageProgressBar from './StageProgressBar'
 import UpgradePanel from './UpgradePanel'
 import { formatNumber } from './utils/formatNumber'
 import './App.css'
@@ -334,6 +335,7 @@ function App() {
       <SaveIndicator status={saveStatus} />
       <p className="brand">{BRAND_NAME}</p>
       {stageName && <h1 className="title">{stageName}</h1>}
+      {save && <StageProgressBar save={save} />}
       {save && (
         <>
           <ActiveEffects activeEvents={save.activeEvents} now={now} />

@@ -1,0 +1,80 @@
+.stage-progress {
+  width: 100%;
+  max-width: 22rem;
+  flex-shrink: 0;
+  transition: opacity 0.35s ease, max-height 0.35s ease, margin 0.35s ease;
+}
+
+.stage-progress__label {
+  margin: 0 0 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+  font-size: clamp(0.65rem, 2.6vw, 0.8rem);
+  font-weight: 700;
+  line-height: 1.25;
+  transform: rotate(0.5deg);
+}
+
+.stage-progress__track {
+  height: 14px;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+  overflow: hidden;
+  transition: opacity 0.35s ease, height 0.35s ease, margin 0.35s ease;
+}
+
+.stage-progress__track[hidden] {
+  display: block;
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  border-width: 0;
+  pointer-events: none;
+}
+
+.stage-progress__fill {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width 0.4s ease, background-color 0.35s ease;
+}
+
+.stage-progress--attention-blocked .stage-progress__fill {
+  background-color: var(--color-alert);
+}
+
+.stage-progress--attention-blocked .stage-progress__label {
+  background-color: var(--color-alert);
+}
+
+.stage-progress__hint {
+  margin: 0.3rem 0 0;
+  padding: 0.25rem 0.45rem;
+  border: 2px solid var(--color-ink);
+  background-color: var(--color-surface);
+  font-size: clamp(0.6rem, 2.4vw, 0.72rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink);
+  transform: rotate(-0.5deg);
+}
+
+.stage-progress--max .stage-progress__label,
+.stage-progress--rebirth .stage-progress__label {
+  background-color: var(--color-success);
+}
+
+.stage-progress--rebirth .stage-progress__label {
+  background-color: var(--color-alert);
+  animation: stage-progress-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes stage-progress-pulse {
+  0%,
+  100% {
+    transform: rotate(0.5deg) scale(1);
+  }
+  50% {
+    transform: rotate(0.5deg) scale(1.02);
+  }
+}
