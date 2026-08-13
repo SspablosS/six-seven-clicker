@@ -2,6 +2,14 @@
 
 Мемный кликер про культ вокруг фразы «6-7»: кликаешь, копишь **Эхо**, покупаешь улучшения, переживаешь случайные события и ведёшь культ от школьного двора до числовой сингулярности.
 
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-ESM-339933?logo=node.js&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=javascript&logoColor=111)
+![CSS](https://img.shields.io/badge/CSS-Variables-1572B6?logo=css3&logoColor=white)
+![JSON](https://img.shields.io/badge/Storage-JSON-111111?logo=json&logoColor=white)
+
 ## Запуск
 
 ```bash
