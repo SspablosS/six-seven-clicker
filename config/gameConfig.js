@@ -169,7 +169,7 @@ export const STAGES = {
   3: {
     id: 3,
     name: 'Федеральные новости',
-    lifetimeEcho: 2000,
+    lifetimeEcho: 4000,
     minAttention: 200,
     minRebirths: 0,
     theme: {
@@ -186,7 +186,7 @@ export const STAGES = {
   4: {
     id: 4,
     name: 'Мировой культ',
-    lifetimeEcho: 15000,
+    lifetimeEcho: 25000,
     minAttention: 500,
     minRebirths: 0,
     theme: {
