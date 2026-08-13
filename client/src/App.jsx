@@ -338,66 +338,71 @@ function App() {
       {save && <StageProgressBar save={save} />}
       {save && (
         <>
-          <ActiveEffects activeEvents={save.activeEvents} now={now} />
+          <div className="app-core">
+            <ActiveEffects activeEvents={save.activeEvents} now={now} />
 
-          <div className="resource-row">
-            <p className="echo-counter" aria-live="polite">
-              <span className="echo-counter__label">{resourceLabel}</span>
-              <span className="echo-counter__value">{formatNumber(save.echo)}</span>
-            </p>
-            {isAttentionUnlocked(save) && (
-              <p className="attention-counter" aria-live="polite">
-                <span className="echo-counter__label">{ATTENTION_LABEL}</span>
-                <span className="attention-counter__value">
-                  {formatNumber(save.attention)}
-                </span>
+            <div className="resource-row">
+              <p className="echo-counter" aria-live="polite">
+                <span className="echo-counter__label">{resourceLabel}</span>
+                <span className="echo-counter__value">{formatNumber(save.echo)}</span>
               </p>
-            )}
+              {isAttentionUnlocked(save) && (
+                <p className="attention-counter" aria-live="polite">
+                  <span className="echo-counter__label">{ATTENTION_LABEL}</span>
+                  <span className="attention-counter__value">
+                    {formatNumber(save.attention)}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            <div className="click-zone">
+              <p className="click-power">за клик: +{formatNumber(clickValue)}</p>
+              <ClickButton
+                onShout={handleShout}
+                skinId={save.selectedSkin || 'classic'}
+              />
+              {floaters.map((f) => (
+                <span
+                  key={f.id}
+                  className="floater"
+                  style={{ '--floater-x': `${f.offsetX}px` }}
+                >
+                  +{formatNumber(f.value)}
+                </span>
+              ))}
+            </div>
+
+            <div className="app-core__actions">
+              {isAttentionSpendUnlocked(save) && (
+                <button
+                  type="button"
+                  className="attention-event-btn"
+                  disabled={!canSpendAttentionForEvent(save)}
+                  onClick={handleSpendAttention}
+                >
+                  Организовать инфоповод ({ATTENTION_SPEND_TO_TRIGGER_EVENT} внимания)
+                </button>
+              )}
+
+              {isRebirthUnlocked(save) && (
+                <button type="button" className="rebirth-btn" onClick={handleRebirth}>
+                  {REBIRTH_LABEL}
+                </button>
+              )}
+            </div>
           </div>
 
-          <p className="click-power">за клик: +{formatNumber(clickValue)}</p>
-
-          <div className="click-zone">
-            <ClickButton
-              onShout={handleShout}
-              skinId={save.selectedSkin || 'classic'}
+          <div className="app-scroll">
+            <MonetizationPanel
+              save={save}
+              onSelectSkin={handleSelectSkin}
+              onAdBoost={handleAdBoost}
+              adBlocked={adBoostActive}
             />
-            {floaters.map((f) => (
-              <span
-                key={f.id}
-                className="floater"
-                style={{ '--floater-x': `${f.offsetX}px` }}
-              >
-                +{formatNumber(f.value)}
-              </span>
-            ))}
+
+            <UpgradePanel save={save} onBuy={handleBuy} />
           </div>
-
-          {isAttentionSpendUnlocked(save) && (
-            <button
-              type="button"
-              className="attention-event-btn"
-              disabled={!canSpendAttentionForEvent(save)}
-              onClick={handleSpendAttention}
-            >
-              Организовать инфоповод ({ATTENTION_SPEND_TO_TRIGGER_EVENT} внимания)
-            </button>
-          )}
-
-          {isRebirthUnlocked(save) && (
-            <button type="button" className="rebirth-btn" onClick={handleRebirth}>
-              {REBIRTH_LABEL}
-            </button>
-          )}
-
-          <MonetizationPanel
-            save={save}
-            onSelectSkin={handleSelectSkin}
-            onAdBoost={handleAdBoost}
-            adBlocked={adBoostActive}
-          />
-
-          <UpgradePanel save={save} onBuy={handleBuy} />
         </>
       )}
       {showOfflineModal && (

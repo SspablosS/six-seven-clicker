@@ -35,4 +35,10 @@ body {
     max-height: 100dvh;
     overflow: hidden;
   }
+
+  #root {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
 }

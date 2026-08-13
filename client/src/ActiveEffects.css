@@ -23,6 +23,24 @@
   font-size: 0.85rem;
 }
 
+@media (max-width: 767px) {
+  .effects {
+    gap: 0.25rem;
+  }
+
+  .effects__item {
+    width: 100%;
+    padding: 0.28rem 0.45rem;
+    border-width: 2px;
+    font-size: 0.68rem;
+    gap: 0.3rem;
+  }
+
+  .effects__icon {
+    font-size: 0.72rem;
+  }
+}
+
 @media (min-width: 768px) {
   .effects__item {
     transform: rotate(-1deg);

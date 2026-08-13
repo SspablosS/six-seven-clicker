@@ -53,6 +53,21 @@
   color: #111111;
 }
 
+@media (max-width: 767px) {
+  .click-btn {
+    width: min(220px, 62vw);
+    height: min(220px, 62vw);
+    min-width: 175px;
+    min-height: 175px;
+    padding: 0.8rem;
+    border-width: 4px;
+  }
+
+  .click-btn__label {
+    font-size: clamp(0.8rem, 3vw, 1.05rem);
+  }
+}
+
 @media (min-width: 768px) {
   .click-btn {
     width: min(240px, 28vw);

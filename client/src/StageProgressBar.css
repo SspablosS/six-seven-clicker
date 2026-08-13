@@ -78,3 +78,28 @@
     transform: rotate(0.5deg) scale(1.02);
   }
 }
+
+@media (max-width: 767px) {
+  .stage-progress {
+    max-width: 100%;
+  }
+
+  .stage-progress__label {
+    margin-bottom: 0.2rem;
+    padding: 0.2rem 0.4rem;
+    border-width: 2px;
+    font-size: 0.62rem;
+  }
+
+  .stage-progress__track {
+    height: 10px;
+    border-width: 2px;
+  }
+
+  .stage-progress__hint {
+    margin-top: 0.2rem;
+    padding: 0.2rem 0.35rem;
+    font-size: 0.58rem;
+    border-width: 2px;
+  }
+}

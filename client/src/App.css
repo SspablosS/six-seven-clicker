@@ -14,14 +14,124 @@
   overflow-x: hidden;
 }
 
-/* Мобилка: всё влезает в экран, скролл только у улучшений */
+/* Мобилка: компактный верх + скролл магазина/улучшений */
 @media (max-width: 767px) {
   .app {
+    flex: 1 1 auto;
     height: 100dvh;
     max-height: 100dvh;
     min-height: 0;
     overflow: hidden;
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    gap: 0.2rem;
+    padding: 0.45rem 0.5rem max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .brand {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.4rem;
+    border-width: 2px;
+  }
+
+  .title {
+    font-size: clamp(1rem, 5.2vw, 1.35rem);
+    -webkit-text-stroke: 1px var(--color-ink);
+    line-height: 1.05;
+  }
+
+  .app-core {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .app-core__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .app-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .app-scroll .mono {
+    flex-shrink: 0;
+  }
+
+  .app-scroll .upgrades {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.15rem;
+  }
+
+  .app-scroll .upgrades__grid {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .resource-row {
+    gap: 0.3rem;
+  }
+
+  .echo-counter,
+  .attention-counter {
+    padding: 0.22rem 0.5rem;
+    border-width: 2px;
+  }
+
+  .echo-counter__label {
+    font-size: 0.6rem;
+  }
+
+  .echo-counter__value {
+    font-size: clamp(1.05rem, 4.8vw, 1.45rem);
+  }
+
+  .attention-counter__value {
+    font-size: clamp(0.95rem, 4.2vw, 1.25rem);
+  }
+
+  .click-zone {
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    width: 100%;
+  }
+
+  .click-power {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    border-width: 2px;
+  }
+
+  .attention-event-btn,
+  .rebirth-btn {
+    min-height: 34px;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.68rem;
+    border-width: 2px;
+    max-width: 100%;
   }
 }
 
@@ -173,20 +283,22 @@
 .click-zone {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   width: 100%;
   margin-top: 0.35rem;
   margin-bottom: 0.15rem;
   min-height: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
 }
 
 
 .floater {
   position: absolute;
   left: 50%;
-  top: 30%;
+  top: 42%;
   font-family: var(--font-numbers);
   font-size: 1.25rem;
   color: var(--color-success);
@@ -217,6 +329,22 @@
     max-height: none;
     min-height: 100vh;
     overflow: visible;
+  }
+
+  .app-core,
+  .app-scroll {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .app-core__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
   }
 
   .brand {

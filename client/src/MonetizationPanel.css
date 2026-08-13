@@ -212,6 +212,39 @@
   background-color: #f4ff3d;
 }
 
+@media (max-width: 767px) {
+  .mono {
+    margin-top: 0.15rem;
+  }
+
+  .mono__title {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mono__pass {
+    margin-bottom: 0.3rem;
+    padding: 0.4rem 0.55rem;
+    border-width: 2px;
+  }
+
+  .mono__pass-name,
+  .mono__pass-price {
+    font-size: 0.75rem;
+  }
+
+  .mono__row {
+    gap: 0.3rem;
+  }
+
+  .mono__chip {
+    padding: 0.3rem 0.45rem;
+    border-width: 2px;
+    font-size: 0.68rem;
+    min-height: 32px;
+  }
+}
+
 @media (min-width: 768px) {
   .mono {
     margin-top: 1rem;
