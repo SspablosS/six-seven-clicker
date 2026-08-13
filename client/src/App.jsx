@@ -4,19 +4,24 @@ import {
   AD_BOOST,
   addEcho,
   applyAdBoost,
+  applyAttentionTick,
   applyStageProgress,
+  ATTENTION_SPEND_TO_TRIGGER_EVENT,
   calcClickValueWithEvents,
   calcEchoPerSecWithEvents,
+  canSpendAttentionForEvent,
   getResourceLabel,
   getStageDef,
   getStageName,
   getStageTheme,
+  isAttentionSpendUnlocked,
   isAttentionUnlocked,
   isRebirthUnlocked,
   performRebirth,
   pruneActiveEvents,
   purchaseUpgrade,
   randomEventDelayMs,
+  spendAttentionForEvent,
   triggerRandomEvent,
 } from '../../config/gameConfig.js'
 import { buildSaveErrorToast } from '../../config/toastBuilder.js'
@@ -193,11 +198,12 @@ function App() {
       setSave((prev) => {
         if (!prev) return prev
         let next = pruneActiveEvents(prev, tickNow)
+        next = applyAttentionTick(next)
         const gain = calcEchoPerSecWithEvents(next, tickNow)
         if (gain > 0) {
-          next = applyStageProgress(addEcho(next, gain)).save
+          next = addEcho(next, gain)
         }
-        return next
+        return applyStageProgress(next).save
       })
     }, TICK_MS)
 
@@ -296,6 +302,20 @@ function App() {
     setNow(Date.now())
   }
 
+  function handleSpendAttention() {
+    const prev = saveRef.current
+    if (!prev || !canSpendAttentionForEvent(prev)) return
+
+    const tickNow = Date.now()
+    const { save: next, toast } = spendAttentionForEvent(prev, tickNow)
+
+    setSave(next)
+    saveRef.current = next
+    markDirty()
+    if (toast) setEventToast(toast)
+    setNow(tickNow)
+  }
+
   const stage = save?.stage || 1
   const stageName = save ? getStageName(save.stage) : null
   const clickValue = save ? calcClickValueWithEvents(save, now) : 0
@@ -350,6 +370,17 @@ function App() {
               </span>
             ))}
           </div>
+
+          {isAttentionSpendUnlocked(save) && (
+            <button
+              type="button"
+              className="attention-event-btn"
+              disabled={!canSpendAttentionForEvent(save)}
+              onClick={handleSpendAttention}
+            >
+              Организовать инфоповод ({ATTENTION_SPEND_TO_TRIGGER_EVENT} внимания)
+            </button>
+          )}
 
           {isRebirthUnlocked(save) && (
             <button type="button" className="rebirth-btn" onClick={handleRebirth}>

@@ -21,8 +21,13 @@ export const UPGRADE_RATES = {
 /** Бот-ферма: +% к шансу кризиса за уровень (для E4) */
 export const BOTFARM_CRISIS_CHANCE_PER_LEVEL = 0.02;
 
-/** Локальные новости: +Внимание за уровень при покупке */
+/** Локальные новости: +Внимание/сек за уровень */
 export const NEWS_ATTENTION_PER_LEVEL = 1;
+
+/** Внимание: затухание и трата на инфоповод */
+export const ATTENTION_DECAY_PER_SECOND = 0.03;
+export const ATTENTION_SPEND_TO_TRIGGER_EVENT = 200;
+export const ATTENTION_SPEND_TARGET_EVENT = 'muskTweet';
 
 /** Интервал случайных событий */
 export const EVENT_INTERVAL_MIN_MS = 20_000;
@@ -163,7 +168,7 @@ export const STAGES = {
     id: 3,
     name: 'Федеральные новости',
     lifetimeEcho: 2000,
-    minAttention: 1,
+    minAttention: 500,
     minRebirths: 0,
     theme: {
       bg: '#111111',
@@ -180,7 +185,7 @@ export const STAGES = {
     id: 4,
     name: 'Мировой культ',
     lifetimeEcho: 15000,
-    minAttention: 1,
+    minAttention: 5000,
     minRebirths: 0,
     theme: {
       bg: '#0a0a0a',
@@ -305,7 +310,7 @@ export const UPGRADES = [
     id: 'news',
     name: 'Локальные новости',
     icon: 'Н',
-    description: 'Открывает Внимание для этапов 3+',
+    description: `+${NEWS_ATTENTION_PER_LEVEL} Внимание/сек за уровень`,
     basePrice: 500,
     badgeIndex: 0,
     rotate: 2,
@@ -487,8 +492,65 @@ export function calcEchoEarned(save, elapsedMs) {
   return Math.floor(calcEchoPerSec(save) * (elapsedMs / 1000));
 }
 
+export function getAttentionPerSecond(save) {
+  const newsLevel = save.upgrades?.news || 0;
+  const attention = save.attention || 0;
+  return (
+    newsLevel * NEWS_ATTENTION_PER_LEVEL -
+    attention * ATTENTION_DECAY_PER_SECOND
+  );
+}
+
+export function applyAttentionTick(save) {
+  const delta = getAttentionPerSecond(save);
+  return {
+    ...save,
+    attention: Math.max(0, (save.attention || 0) + delta),
+  };
+}
+
 export function isAttentionUnlocked(save) {
   return (save.upgrades?.news || 0) > 0;
+}
+
+export function isAttentionSpendUnlocked(save) {
+  return (save.stage || 1) >= 3 && isAttentionUnlocked(save);
+}
+
+export function canSpendAttentionForEvent(save) {
+  return (save.attention || 0) >= ATTENTION_SPEND_TO_TRIGGER_EVENT;
+}
+
+/**
+ * Тратит внимание на гарантированный инфоповод.
+ * @returns {{ save: object, toast: object|null }}
+ */
+export function spendAttentionForEvent(save, now = Date.now()) {
+  if (!canSpendAttentionForEvent(save)) {
+    return { save, toast: null };
+  }
+
+  const eventId = ATTENTION_SPEND_TARGET_EVENT;
+  const def = EVENTS[eventId];
+  if (!def) return { save, toast: null };
+
+  let next = {
+    ...save,
+    attention: (save.attention || 0) - ATTENTION_SPEND_TO_TRIGGER_EVENT,
+  };
+
+  let endsAt = null;
+  if (def.durationMs > 0) {
+    endsAt = now + def.durationMs;
+    const rest = (next.activeEvents || []).filter((e) => e.id !== eventId);
+    next = {
+      ...next,
+      activeEvents: [...rest, { id: eventId, endsAt }],
+    };
+  }
+
+  const toast = buildEventToast({ eventId, def, now, echoLoss: null, endsAt });
+  return { save: next, toast };
 }
 
 export function isRebirthUnlocked(save) {
@@ -511,15 +573,9 @@ export function purchaseUpgrade(save, upgradeId) {
     [upgradeId]: level + 1,
   };
 
-  let attention = save.attention || 0;
-  if (upgradeId === 'news') {
-    attention += NEWS_ATTENTION_PER_LEVEL;
-  }
-
   const next = {
     ...save,
     echo: Math.floor(save.echo - price),
-    attention,
     upgrades: nextUpgrades,
   };
 

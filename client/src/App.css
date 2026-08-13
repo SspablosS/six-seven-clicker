@@ -131,6 +131,29 @@
   transform: rotate(1deg) scale(0.96);
 }
 
+.attention-event-btn {
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 2.8vw, 0.85rem);
+  max-width: 100%;
+  min-height: 40px;
+  padding: 0.45rem 0.75rem;
+  border: 3px solid var(--color-ink);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+  transform: rotate(-1deg);
+  flex-shrink: 0;
+}
+
+.attention-event-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.attention-event-btn:not(:disabled):active {
+  transform: rotate(-1deg) scale(0.96);
+}
+
 .echo-counter__label {
   display: block;
   font-size: 0.7rem;
