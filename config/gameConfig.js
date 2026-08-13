@@ -26,12 +26,12 @@ export const NEWS_ATTENTION_PER_LEVEL = 1;
 
 /** Внимание: затухание и трата на инфоповод */
 export const ATTENTION_DECAY_PER_SECOND = 0.03;
-export const ATTENTION_SPEND_TO_TRIGGER_EVENT = 200;
+export const ATTENTION_SPEND_TO_TRIGGER_EVENT = 100;
 export const ATTENTION_SPEND_TARGET_EVENT = 'muskTweet';
 
 /** Интервал случайных событий */
-export const EVENT_INTERVAL_MIN_MS = 20_000;
-export const EVENT_INTERVAL_MAX_MS = 60_000;
+export const EVENT_INTERVAL_MIN_MS = 60_000;
+export const EVENT_INTERVAL_MAX_MS = 120_000;
 
 /** Рекламный буст (монетизация US-8.1) — реальный эффект ×2 */
 export const AD_BOOST = {
@@ -185,7 +185,7 @@ export const STAGES = {
     id: 4,
     name: 'Мировой культ',
     lifetimeEcho: 15000,
-    minAttention: 5000,
+    minAttention: 1000,
     minRebirths: 0,
     theme: {
       bg: '#0a0a0a',
@@ -311,7 +311,7 @@ export const UPGRADES = [
     name: 'Локальные новости',
     icon: 'Н',
     description: `+${NEWS_ATTENTION_PER_LEVEL} Внимание/сек за уровень`,
-    basePrice: 500,
+    basePrice: 300,
     badgeIndex: 0,
     rotate: 2,
     minStage: 2,
@@ -331,7 +331,7 @@ export const UPGRADES = [
     name: 'ИИ-генератор мемов',
     icon: 'И',
     description: 'Открывает кнопку «Переродиться»',
-    basePrice: 2000,
+    basePrice: 20000,
     badgeIndex: 1,
     rotate: -1.5,
     minStage: 4,
