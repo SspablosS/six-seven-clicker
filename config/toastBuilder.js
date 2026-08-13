@@ -22,3 +22,19 @@ export function buildEventToast({ eventId, def, now, echoLoss = null, endsAt = n
     endsAt: resolvedEndsAt,
   };
 }
+
+/** Toast для ошибок load/save API */
+export function buildSaveErrorToast(operation) {
+  const isLoad = operation === 'load';
+
+  return {
+    id: `api-error-${Date.now()}`,
+    eventId: null,
+    type: 'penalty',
+    title: isLoad ? 'Не удалось загрузить' : 'Не удалось сохранить',
+    description: isLoad
+      ? 'Проверь соединение и обнови страницу'
+      : 'Прогресс остался на устройстве — попробуй ещё раз',
+    endsAt: null,
+  };
+}

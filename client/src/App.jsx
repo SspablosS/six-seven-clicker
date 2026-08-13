@@ -19,6 +19,7 @@ import {
   randomEventDelayMs,
   triggerRandomEvent,
 } from '../../config/gameConfig.js'
+import { buildSaveErrorToast } from '../../config/toastBuilder.js'
 import { loadSave, persistSave } from './api/saveApi'
 import ActiveEffects from './ActiveEffects'
 import ClickButton from './ClickButton'
@@ -58,7 +59,6 @@ function App() {
   const [cutscene, setCutscene] = useState(null)
   const [eventToast, setEventToast] = useState(null)
   const [now, setNow] = useState(() => Date.now())
-  const [error, setError] = useState(null)
   const [floaters, setFloaters] = useState([])
   const [hydrated, setHydrated] = useState(false)
   const [saveStatus, setSaveStatus] = useState('idle')
@@ -93,8 +93,10 @@ function App() {
       if (!silent) flashSaved()
     } catch (err) {
       dirtyRef.current = true
-      console.error(err)
-      if (!silent) setSaveStatus('error')
+      if (!silent) {
+        setSaveStatus('error')
+        setEventToast(buildSaveErrorToast('save'))
+      }
     }
   }
 
@@ -128,7 +130,7 @@ function App() {
           setShowOfflineModal(true)
         }
       })
-      .catch((err) => setError(err.message))
+      .catch(() => setEventToast(buildSaveErrorToast('load')))
       .finally(() => setHydrated(true))
   }, [])
 
@@ -312,7 +314,6 @@ function App() {
       <SaveIndicator status={saveStatus} />
       <p className="brand">{BRAND_NAME}</p>
       {stageName && <h1 className="title">{stageName}</h1>}
-      {error && <p className="status">Ошибка: {error}</p>}
       {save && (
         <>
           <ActiveEffects activeEvents={save.activeEvents} now={now} />
