@@ -254,27 +254,29 @@ function App() {
   }
 
   function handleBuy(upgradeId) {
-    setSave((prev) => {
-      if (!prev) return prev
-      const bought = purchaseUpgrade(prev, upgradeId)
-      if (!bought) return prev
-      dirtyRef.current = true
-      saveRef.current = bought
-      persistNow(bought)
-      return bought
-    })
+    const prev = saveRef.current
+    if (!prev) return
+
+    const bought = purchaseUpgrade(prev, upgradeId)
+    if (!bought) return
+
+    setSave(bought)
+    dirtyRef.current = true
+    saveRef.current = bought
+    persistNow(bought)
   }
 
   function handleRebirth() {
-    setSave((prev) => {
-      if (!prev) return prev
-      const next = performRebirth(prev)
-      if (!next) return prev
-      dirtyRef.current = true
-      saveRef.current = next
-      persistNow(next)
-      return next
-    })
+    const prev = saveRef.current
+    if (!prev) return
+
+    const next = performRebirth(prev)
+    if (!next) return
+
+    setSave(next)
+    dirtyRef.current = true
+    saveRef.current = next
+    persistNow(next)
   }
 
   function handleSelectSkin(skinId) {
