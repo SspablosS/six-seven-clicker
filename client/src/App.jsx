@@ -38,6 +38,12 @@ import StageCutscene from './StageCutscene'
 import StageProgressBar from './StageProgressBar'
 import UpgradePanel from './UpgradePanel'
 import { formatNumber } from './utils/formatNumber'
+import AudioControls, { useAudioBootstrap } from './AudioControls'
+import {
+  playClickSound,
+  playEventSound,
+  playUpgradeSound,
+} from './audio/AudioController'
 import './App.css'
 
 const ATTENTION_LABEL = 'Внимание'
@@ -75,6 +81,8 @@ function App() {
   const skipNextPersistRef = useRef(true)
   const savedFlashRef = useRef(null)
   const flushSaveRef = useRef(() => {})
+
+  useAudioBootstrap()
 
   function markDirty() {
     dirtyRef.current = true
@@ -243,6 +251,11 @@ function App() {
     }
   }, [hydrated])
 
+  useEffect(() => {
+    if (!eventToast?.type) return
+    playEventSound(eventToast.type)
+  }, [eventToast?.id, eventToast?.type])
+
   function handleShout() {
     if (!save) return
 
@@ -260,6 +273,8 @@ function App() {
     window.setTimeout(() => {
       setFloaters((prev) => prev.filter((f) => f.id !== id))
     }, 800)
+
+    playClickSound()
   }
 
   function handleBuy(upgradeId) {
@@ -269,6 +284,7 @@ function App() {
     const bought = purchaseUpgrade(prev, upgradeId)
     if (!bought) return
 
+    playUpgradeSound()
     setSave(bought)
     dirtyRef.current = true
     saveRef.current = bought
@@ -333,6 +349,7 @@ function App() {
   return (
     <main className="app" data-stage={stage} style={themeVars}>
       <SaveIndicator status={saveStatus} />
+      <AudioControls />
       <p className="brand">{BRAND_NAME}</p>
       {stageName && <h1 className="title">{stageName}</h1>}
       {save && <StageProgressBar save={save} />}

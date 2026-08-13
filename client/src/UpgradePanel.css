@@ -97,30 +97,37 @@
 
 .upgrade-card__badge {
   grid-area: badge;
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   border: 3px solid var(--color-ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  color: var(--color-ink);
+  padding: 0.2rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--color-surface);
+}
+
+.upgrade-card__icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .badge--alert {
-  background-color: var(--color-alert);
+  border-color: var(--color-alert);
 }
 
 .badge--accent {
-  background-color: var(--color-accent);
-  color: var(--color-surface);
+  border-color: var(--color-accent);
 }
 
 .badge--bg {
-  background-color: var(--color-bg);
-  color: var(--color-surface);
+  border-color: var(--color-bg);
 }
 
 .upgrade-card__body {
@@ -208,9 +215,9 @@
   }
 
   .upgrade-card__badge {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1rem;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.25rem;
   }
 
   .upgrade-card__name {

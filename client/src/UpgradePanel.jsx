@@ -39,8 +39,16 @@ export default function UpgradePanel({ save, onBuy }) {
               key={def.id}
               className={`upgrade-card ${rotateClass(def.rotate)}`}
             >
-              <div className={`upgrade-card__badge ${badgeClass}`} aria-hidden="true">
-                {def.icon}
+              <div className={`upgrade-card__badge ${badgeClass}`}>
+                <img
+                  className="upgrade-card__icon"
+                  src={def.iconSrc}
+                  alt=""
+                  width={40}
+                  height={40}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div className="upgrade-card__body">
                 <h3 className="upgrade-card__name">{def.name}</h3>

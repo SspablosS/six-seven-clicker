@@ -340,7 +340,7 @@ export const UPGRADES = [
   {
     id: 'megaphone',
     name: 'Мегафон',
-    icon: 'M',
+    iconSrc: '/upgrades/megaphone.png',
     description: `+${MEGAPHONE_PER_LEVEL} Эхо за клик`,
     basePrice: 15,
     badgeIndex: 0,
@@ -350,7 +350,7 @@ export const UPGRADES = [
   {
     id: 'kids',
     name: 'Школьники-репитеры',
-    icon: 'Ш',
+    iconSrc: '/upgrades/schoolboy.png',
     description: `+${UPGRADE_RATES.kids} Эхо/сек`,
     basePrice: 50,
     badgeIndex: 1,
@@ -360,7 +360,7 @@ export const UPGRADES = [
   {
     id: 'botfarm',
     name: 'Бот-ферма в Discord',
-    icon: 'Б',
+    iconSrc: '/upgrades/discord.png',
     description: `+${UPGRADE_RATES.botfarm} Эхо/сек, но +${Math.round(BOTFARM_CRISIS_CHANCE_PER_LEVEL * 100)}% к кризисам`,
     basePrice: 200,
     badgeIndex: 2,
@@ -370,7 +370,7 @@ export const UPGRADES = [
   {
     id: 'news',
     name: 'Локальные новости',
-    icon: 'Н',
+    iconSrc: '/upgrades/news.png',
     description: `+${NEWS_ATTENTION_PER_LEVEL} Внимание/сек за уровень`,
     basePrice: 300,
     badgeIndex: 0,
@@ -380,7 +380,7 @@ export const UPGRADES = [
   {
     id: 'merch',
     name: 'Мерч-линия',
-    icon: 'Р',
+    iconSrc: '/upgrades/merch.png',
     description: `+${MERCH_INCOME_PER_TOTAL_CLICK_SQRT}×√кликов×ур. Эхо/сек`,
     basePrice: 750,
     badgeIndex: 2,
@@ -390,7 +390,7 @@ export const UPGRADES = [
   {
     id: 'aiGen',
     name: 'ИИ-генератор мемов',
-    icon: 'И',
+    iconSrc: '/upgrades/ai.png',
     description: 'Открывает кнопку «Переродиться»',
     basePrice: 20000,
     badgeIndex: 1,
