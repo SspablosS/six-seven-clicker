@@ -5,7 +5,7 @@ import { buildEventToast } from './toastBuilder.js';
 export const OFFLINE_CAP_MS = 8 * 60 * 60 * 1000; // 8 часов
 
 export const BASE_CLICK_VALUE = 1;
-export const PRICE_GROWTH = 1.15;
+export const PRICE_GROWTH = 1.18;
 export const TICK_MS = 1000;
 
 /** Мегафон: +Эхо за клик за уровень */
@@ -80,9 +80,9 @@ export const EVENTS = {
     type: 'bonus',
     icon: 'X',
     title: 'Илон Маск затвитил про мем',
-    description: 'Доход ×5 на 60 сек',
+    description: 'Доход ×3 на 60 сек',
     durationMs: 60_000,
-    incomeMult: 5,
+    incomeMult: 3,
   },
   parentsBan: {
     id: 'parentsBan',
@@ -145,7 +145,7 @@ export const STAGES = {
   2: {
     id: 2,
     name: 'TikTok-вирус',
-    lifetimeEcho: 250,
+    lifetimeEcho: 500,
     minAttention: 0,
     minRebirths: 0,
     theme: {
@@ -162,7 +162,7 @@ export const STAGES = {
   3: {
     id: 3,
     name: 'Федеральные новости',
-    lifetimeEcho: 1000,
+    lifetimeEcho: 2000,
     minAttention: 1,
     minRebirths: 0,
     theme: {
@@ -179,7 +179,7 @@ export const STAGES = {
   4: {
     id: 4,
     name: 'Мировой культ',
-    lifetimeEcho: 5000,
+    lifetimeEcho: 15000,
     minAttention: 1,
     minRebirths: 0,
     theme: {
@@ -191,7 +191,7 @@ export const STAGES = {
       surface: '#ffffff',
     },
     cutscene:
-      'Флаги, мерч, хоры на площадях. Планета синхронно орёт два числа — и называет это цивилизацией.',
+      'Флаги, мерч, хоры на площадях. Планета синхронно орёт два числа 6-7!',
   },
   5: {
     id: 5,
@@ -208,7 +208,7 @@ export const STAGES = {
       surface: '#ffffff',
     },
     cutscene:
-      'После перерождения числа сложились в узор. Six и Seven больше не мем — это протокол реальности.',
+      'После перерождения числа сложились в узор. Six и Seven больше не мем — это целая вселенная.',
   },
 };
 
@@ -467,7 +467,8 @@ export function calcEchoPerSec(save) {
   const kids = (upgrades.kids || 0) * UPGRADE_RATES.kids;
   const botfarm = (upgrades.botfarm || 0) * UPGRADE_RATES.botfarm;
   const merch = Math.floor(
-    ((upgrades.merch || 0) * (totalClicks || 0)) / UPGRADE_RATES.merchClicksPerEcho,
+    ((upgrades.merch || 0) * (totalClicks || 0)) /
+      UPGRADE_RATES.merchClicksPerEcho,
   );
   return kids + botfarm + merch;
 }
