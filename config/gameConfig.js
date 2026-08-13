@@ -15,8 +15,10 @@ export const MEGAPHONE_PER_LEVEL = 1;
 export const UPGRADE_RATES = {
   kids: 1,
   botfarm: 2,
-  merchClicksPerEcho: 100,
 };
+
+/** Мерч: доход от sqrt(totalClicks), не от echo/lifetimeEcho */
+export const MERCH_INCOME_PER_TOTAL_CLICK_SQRT = 0.02;
 
 /** Бот-ферма: +% к шансу кризиса за уровень (для E4) */
 export const BOTFARM_CRISIS_CHANCE_PER_LEVEL = 0.02;
@@ -168,7 +170,7 @@ export const STAGES = {
     id: 3,
     name: 'Федеральные новости',
     lifetimeEcho: 2000,
-    minAttention: 500,
+    minAttention: 200,
     minRebirths: 0,
     theme: {
       bg: '#111111',
@@ -185,7 +187,7 @@ export const STAGES = {
     id: 4,
     name: 'Мировой культ',
     lifetimeEcho: 15000,
-    minAttention: 1000,
+    minAttention: 500,
     minRebirths: 0,
     theme: {
       bg: '#0a0a0a',
@@ -320,7 +322,7 @@ export const UPGRADES = [
     id: 'merch',
     name: 'Мерч-линия',
     icon: 'Р',
-    description: 'Доход растёт с totalClicks',
+    description: `+${MERCH_INCOME_PER_TOTAL_CLICK_SQRT}×√кликов×ур. Эхо/сек`,
     basePrice: 750,
     badgeIndex: 2,
     rotate: 1,
@@ -471,10 +473,15 @@ export function calcEchoPerSec(save) {
   const { upgrades, totalClicks } = save;
   const kids = (upgrades.kids || 0) * UPGRADE_RATES.kids;
   const botfarm = (upgrades.botfarm || 0) * UPGRADE_RATES.botfarm;
-  const merch = Math.floor(
-    ((upgrades.merch || 0) * (totalClicks || 0)) /
-      UPGRADE_RATES.merchClicksPerEcho,
-  );
+  const merchLevel = upgrades.merch || 0;
+  const merch =
+    merchLevel > 0
+      ? Math.floor(
+          Math.sqrt(totalClicks || 0) *
+            MERCH_INCOME_PER_TOTAL_CLICK_SQRT *
+            merchLevel,
+        )
+      : 0;
   return kids + botfarm + merch;
 }
 
