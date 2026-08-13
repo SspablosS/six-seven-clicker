@@ -392,7 +392,7 @@ export function randomEventDelayMs() {
 
 export function hasActiveTimedEvent(save, now = Date.now()) {
   const active = pruneActiveEvents(save, now).activeEvents || [];
-  return active.some((e) => (EVENTS[e.id]?.durationMs ?? 0) > 0);
+  return active.some((e) => (getEffectDef(e.id)?.durationMs ?? 0) > 0);
 }
 
 /** Вес кризиса растёт с бот-фермой. Timed-события не выбираются, если уже есть активный таймер. */
@@ -409,7 +409,7 @@ export function pickWeightedEventId(save, now = Date.now()) {
     { id: 'memeTwist', weight: 1 },
   ].filter((item) => {
     if (!blockTimed) return true;
-    return (EVENTS[item.id]?.durationMs ?? 0) === 0;
+    return (getEffectDef(item.id)?.durationMs ?? 0) === 0;
   });
 
   if (weights.length === 0) return null;
@@ -446,9 +446,10 @@ export function triggerRandomEvent(save, now = Date.now()) {
   let endsAt = null;
   if (def.durationMs > 0) {
     endsAt = now + def.durationMs;
+    const rest = (next.activeEvents || []).filter((e) => e.id !== eventId);
     next = {
       ...next,
-      activeEvents: [{ id: eventId, endsAt }],
+      activeEvents: [...rest, { id: eventId, endsAt }],
     };
   }
 
