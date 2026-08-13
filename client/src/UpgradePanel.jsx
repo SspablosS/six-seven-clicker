@@ -3,6 +3,7 @@ import {
   calcUpgradePrice,
   getVisibleUpgrades,
 } from '../../config/gameConfig.js'
+import { useTapAction } from './utils/tapAction'
 import { formatNumber } from './utils/formatNumber'
 import './UpgradePanel.css'
 
@@ -12,6 +13,23 @@ const BADGE_CLASSES = ['badge--alert', 'badge--accent', 'badge--bg']
 
 function rotateClass(deg) {
   return `upgrade-card--rot${String(deg).replace('.', '')}`
+}
+
+function BuyButton({ disabled, onBuy, className, children }) {
+  const tap = useTapAction(() => {
+    if (!disabled) onBuy()
+  })
+
+  return (
+    <button
+      type="button"
+      className={className}
+      disabled={disabled}
+      {...tap}
+    >
+      {children}
+    </button>
+  )
 }
 
 export default function UpgradePanel({ save, onBuy }) {
@@ -57,14 +75,13 @@ export default function UpgradePanel({ save, onBuy }) {
                   {LEVEL_LABEL} {level} · {formatNumber(price)} Эхо
                 </p>
               </div>
-              <button
-                type="button"
+              <BuyButton
                 className="upgrade-card__buy"
                 disabled={!canBuy}
-                onClick={() => onBuy(def.id)}
+                onBuy={() => onBuy(def.id)}
               >
                 {BUY_LABEL}
-              </button>
+              </BuyButton>
             </li>
           )
         })}

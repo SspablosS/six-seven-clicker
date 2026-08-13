@@ -81,6 +81,7 @@ function App() {
   const skipNextPersistRef = useRef(true)
   const savedFlashRef = useRef(null)
   const flushSaveRef = useRef(() => {})
+  const lastBuyRef = useRef({ id: null, at: 0 })
 
   useAudioBootstrap()
 
@@ -278,6 +279,15 @@ function App() {
   }
 
   function handleBuy(upgradeId) {
+    const now = performance.now()
+    if (
+      lastBuyRef.current.id === upgradeId &&
+      now - lastBuyRef.current.at < 100
+    ) {
+      return
+    }
+    lastBuyRef.current = { id: upgradeId, at: now }
+
     const prev = saveRef.current
     if (!prev) return
 
