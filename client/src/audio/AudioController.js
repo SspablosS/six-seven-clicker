@@ -1,5 +1,9 @@
 const STORAGE_KEY = 'sixSevenAudioSettings';
 
+const CLICK_URL = '/audio/click.mp3';
+const MUSIC_URL = '/audio/music.mp3';
+const CLICK_PITCH_VARIATION = 0.14;
+
 const DEFAULT_SETTINGS = {
   musicEnabled: true,
   sfxEnabled: true,
@@ -16,8 +20,17 @@ let musicGain = null;
 /** @type {GainNode | null} */
 let sfxGain = null;
 
-/** @type {ReturnType<typeof setInterval> | null} */
-let musicTimer = null;
+/** @type {HTMLAudioElement | null} */
+let musicElement = null;
+
+/** @type {MediaElementAudioSourceNode | null} */
+let musicSource = null;
+
+/** @type {AudioBuffer | null} */
+let clickBuffer = null;
+
+/** @type {Promise<AudioBuffer | null> | null} */
+let clickBufferPromise = null;
 
 /** @type {Set<(settings: object) => void>} */
 const listeners = new Set();
@@ -97,12 +110,49 @@ function ensureMusicGain(ctx) {
 
 function updateMusicGain() {
   if (!musicGain) return;
-  musicGain.gain.value = settings.musicEnabled ? settings.musicVolume * 0.2 : 0;
+  musicGain.gain.value = settings.musicEnabled ? settings.musicVolume : 0;
 }
 
 function updateSfxGain() {
   if (!sfxGain) return;
   sfxGain.gain.value = settings.sfxEnabled ? settings.sfxVolume : 0;
+}
+
+function ensureMusicElement(ctx) {
+  if (!musicElement) {
+    musicElement = new Audio(MUSIC_URL);
+    musicElement.loop = true;
+    musicElement.preload = 'auto';
+    musicSource = ctx.createMediaElementSource(musicElement);
+    musicSource.connect(ensureMusicGain(ctx));
+  }
+  return musicElement;
+}
+
+async function ensureClickBuffer() {
+  const ctx = ensureContext();
+  if (!ctx) return null;
+  if (clickBuffer) return clickBuffer;
+
+  if (!clickBufferPromise) {
+    clickBufferPromise = fetch(CLICK_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load ${CLICK_URL}`);
+        return response.arrayBuffer();
+      })
+      .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
+      .then((decoded) => {
+        clickBuffer = decoded;
+        return decoded;
+      })
+      .catch((err) => {
+        console.warn('[audio] click buffer load failed', err);
+        clickBufferPromise = null;
+        return null;
+      });
+  }
+
+  return clickBufferPromise;
 }
 
 export async function resumeAudio() {
@@ -111,9 +161,58 @@ export async function resumeAudio() {
   if (ctx.state === 'suspended') {
     await ctx.resume();
   }
-  if (settings.musicEnabled && musicTimer == null) {
+  void ensureClickBuffer();
+  if (settings.musicEnabled) {
     startMusic();
   }
+}
+
+function startMusic() {
+  if (!settings.musicEnabled) return;
+
+  const ctx = ensureContext();
+  if (!ctx) return;
+
+  ensureMusicElement(ctx);
+  ensureMusicGain(ctx);
+
+  if (musicElement.paused) {
+    void musicElement.play().catch(() => {});
+  }
+}
+
+function stopMusic() {
+  if (musicElement) {
+    musicElement.pause();
+  }
+  updateMusicGain();
+}
+
+function applyMusicState() {
+  if (settings.musicEnabled) {
+    void resumeAudio();
+  } else {
+    stopMusic();
+  }
+}
+
+function applySfxState() {
+  const ctx = ensureContext();
+  if (!ctx) return;
+  ensureSfxGain(ctx);
+  updateSfxGain();
+}
+
+function playSampledClick() {
+  const ctx = ensureContext();
+  if (!ctx || !clickBuffer || !settings.sfxEnabled) return;
+
+  const source = ctx.createBufferSource();
+  source.buffer = clickBuffer;
+  source.playbackRate.value =
+    1 + (Math.random() * 2 - 1) * CLICK_PITCH_VARIATION;
+  source.connect(ensureSfxGain(ctx));
+  source.start();
 }
 
 function playTone({
@@ -150,81 +249,28 @@ function playTone({
   osc.stop(start + duration + 0.02);
 }
 
-function playMusicNote(frequency, duration = 0.45) {
-  const ctx = getContext();
-  if (!ctx || !settings.musicEnabled || musicTimer == null) return;
-
-  const dest = ensureMusicGain(ctx);
-  const start = ctx.currentTime;
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(frequency, start);
-
-  const peak = 0.35;
-  gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(peak, start + 0.04);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-  osc.connect(gain);
-  gain.connect(dest);
-
-  osc.start(start);
-  osc.stop(start + duration + 0.02);
-}
-
-const MUSIC_PATTERN = [196, 220, 246.94, 261.63, 293.66, 329.63];
-let musicStep = 0;
-
-function startMusic() {
-  if (musicTimer || !settings.musicEnabled) return;
-
-  const ctx = ensureContext();
-  if (!ctx) return;
-
-  ensureMusicGain(ctx);
-  musicTimer = window.setInterval(() => {
-    if (!settings.musicEnabled) return;
-    const freq = MUSIC_PATTERN[musicStep % MUSIC_PATTERN.length];
-    musicStep += 1;
-    playMusicNote(freq, 0.5);
-  }, 700);
-}
-
-function stopMusic() {
-  if (musicTimer) {
-    window.clearInterval(musicTimer);
-    musicTimer = null;
-  }
-  updateMusicGain();
-}
-
-function applyMusicState() {
-  if (settings.musicEnabled) {
-    void resumeAudio();
-  } else {
-    stopMusic();
-  }
-}
-
-function applySfxState() {
-  const ctx = ensureContext();
-  if (!ctx) return;
-  ensureSfxGain(ctx);
-  updateSfxGain();
-}
-
 export function playClickSound() {
   if (!settings.sfxEnabled) return;
   void resumeAudio();
-  playTone({
-    frequency: 520,
-    duration: 0.07,
-    type: 'square',
-    volume: 0.18,
-    pitchVariation: 0.14,
+
+  if (clickBuffer) {
+    playSampledClick();
+    return;
+  }
+
+  void ensureClickBuffer().then((buffer) => {
+    if (buffer) {
+      playSampledClick();
+      return;
+    }
+
+    playTone({
+      frequency: 520,
+      duration: 0.07,
+      type: 'square',
+      volume: 0.18,
+      pitchVariation: CLICK_PITCH_VARIATION,
+    });
   });
 }
 
