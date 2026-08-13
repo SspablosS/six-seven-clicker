@@ -1,7 +1,9 @@
 const STORAGE_KEY = 'sixSevenAudioSettings';
 
-const CLICK_URL = '/audio/click.mp3';
-const MUSIC_URL = '/audio/music.mp3';
+import { assetUrl } from '@/utils/assetUrl'
+
+const CLICK_URL = assetUrl('/audio/click.mp3');
+const MUSIC_URL = assetUrl('/audio/music.mp3');
 const CLICK_PITCH_VARIATION = 0.14;
 
 const DEFAULT_SETTINGS = {

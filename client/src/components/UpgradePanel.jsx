@@ -5,6 +5,7 @@ import {
 } from '@config/gameConfig.js'
 import { useTapAction } from '@/hooks/useTapAction'
 import { formatNumber } from '@/utils/formatNumber'
+import { assetUrl } from '@/utils/assetUrl'
 import './UpgradePanel.css'
 
 const BUY_LABEL = 'Купить'
@@ -60,7 +61,7 @@ export default function UpgradePanel({ save, onBuy }) {
               <div className={`upgrade-card__badge ${badgeClass}`}>
                 <img
                   className="upgrade-card__icon"
-                  src={def.iconSrc}
+                  src={assetUrl(def.iconSrc)}
                   alt=""
                   width={40}
                   height={40}
